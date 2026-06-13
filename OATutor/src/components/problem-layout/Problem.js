@@ -21,6 +21,7 @@ import withTranslation from "../../util/withTranslation.js"
 
 import {
     CANVAS_WARNING_STORAGE_KEY,
+    DYNAMIC_HINT_URL,
     MIDDLEWARE_URL,
     SHOW_NOT_CANVAS_WARNING,
     SITE_NAME,
@@ -69,7 +70,7 @@ class Problem extends React.Component {
         this.doMasteryUpdate = doMasteryUpdate == null || doMasteryUpdate;
         this.unlockFirstHint = unlockFirstHint != null && unlockFirstHint;
         this.giveStuBottomHint = giveStuBottomHint == null || giveStuBottomHint;
-        this.giveDynamicHint = this.props.lesson?.allowDynamicHint;
+        this.giveDynamicHint = this.props.lesson?.allowDynamicHint || Boolean(DYNAMIC_HINT_URL);
         this.prompt_template = this.props.lesson?.prompt_template
             ? this.props.lesson?.prompt_template
             : "";
