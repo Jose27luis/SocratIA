@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 
 import anthropic
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+
+import db
 
 load_dotenv()
 
@@ -14,6 +19,13 @@ MODEL = os.getenv("MODEL", "claude-haiku-4-5")
 client = anthropic.Anthropic()
 
 app = FastAPI(title="SócratIA · Servicio de pistas socráticas")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 SYSTEM_PROMPT = (
     "Eres SócratIA, un tutor inteligente que enseña con el método socrático. "
@@ -80,3 +92,58 @@ def generate_hint(req: HintRequest) -> HintResponse:
 
     hint = next((block.text for block in message.content if block.type == "text"), "")
     return HintResponse(hint=hint.strip(), model=message.model)
+
+
+class DynamicHintRequest(BaseModel):
+    role: str = "user"
+    message: str
+
+
+@app.post("/dynamic-hint")
+def dynamic_hint(req: DynamicHintRequest) -> StreamingResponse:
+    def stream() -> Iterator[str]:
+        with client.messages.stream(
+            model=MODEL,
+            max_tokens=300,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": req.message}],
+        ) as response:
+            for text in response.text_stream:
+                yield text
+
+    return StreamingResponse(stream(), media_type="text/plain")
+
+
+class AttemptRequest(BaseModel):
+    student: str
+    problem_id: str | None = None
+    step_id: str | None = None
+    skill: str | None = None
+    correct: bool
+    answer: str | None = None
+    mastery: float | None = None
+
+
+@app.post("/progress/attempt")
+def post_attempt(req: AttemptRequest) -> dict[str, str]:
+    try:
+        db.record_attempt(
+            req.student,
+            req.problem_id,
+            req.step_id,
+            req.skill,
+            req.correct,
+            req.answer,
+            req.mastery,
+        )
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error)) from error
+    return {"status": "ok"}
+
+
+@app.get("/progress/{student}")
+def get_progress(student: str) -> dict:
+    try:
+        return db.get_progress(student)
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error)) from error
