@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-anthropic
-python-dotenv
-pydantic
-psycopg
-psycopg_pool

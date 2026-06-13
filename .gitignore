@@ -13,20 +13,12 @@ yarn-debug.log*
 yarn-error.log*
 
 # Entornos locales / secretos
-/ai-service/.env
+/backend/.env
 .env.local
 .env.*.local
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Python (futuro ai-service)
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-*.egg-info/
-.pytest_cache/
 
 # Caché y temporales
 .cache/
