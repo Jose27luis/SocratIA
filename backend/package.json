@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.69.0",
+    "@fastify/formbody": "^8.0.2",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.0",
+    "jose": "^6.2.3",
     "pg": "^8.13.1"
   },
   "devDependencies": {

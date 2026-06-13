@@ -84,6 +84,14 @@ export async function recordAttempt(req: AttemptRequest): Promise<void> {
   }
 }
 
+export async function upsertStudent(externalId: string, name: string | null): Promise<void> {
+  await pool.query(
+    `INSERT INTO students (external_id, name) VALUES ($1, $2)
+     ON CONFLICT (external_id) DO UPDATE SET name = COALESCE(EXCLUDED.name, students.name)`,
+    [externalId, name],
+  );
+}
+
 export async function getProgress(externalId: string): Promise<StudentProgress> {
   const studentResult = await pool.query<StudentRow>(
     "SELECT id, external_id, name, created_at FROM students WHERE external_id = $1",
