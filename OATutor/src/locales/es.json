@@ -1,0 +1,46 @@
+{
+    "lessonSelection": 
+    {
+       "welcomeInstructor": "¡Bienvenido Instructor!",
+       "welcomeTo": "Bienvenidos a",
+       "resetprogress": "Restablecer Progreso",
+       "select": "Por favor seleccione un",
+       "course": "curso",
+       "lessonplan": "plan de lección",
+       "onlyselect": "Seleccione",
+       "aresure": "¿Estás seguro?",
+       "reset": "¡Progreso reiniciado!"
+    },
+    "problem":
+    {
+        "NextProblem": "Siguiente problema",
+        "PreviousProblem": "Problema anterior",
+        "Submit": "Entregar",
+        "Feedback": "Retroalimentación",
+        "Response": "Respuesta",
+        "Thanks": "¡Gracias por tu retroalimentación!",
+        "Description": "Siéntete libre de enviar retroalimentación sobre este problema si encuentras algún error. Envía retroalimentación para todas las partes del problema a la vez.",
+        "Derivative": "es una derivación de",
+        "Used": ", utilizado bajo"
+    },
+    "platform":
+    {
+        "Mastery": "Maestría de Lección: ",
+        "LoggedIn": "Sin iniciar sesión"
+    },
+    "hintsystem": 
+    {
+        "hint": "Pista ",
+        "answer": "Respuesta",
+        "answerIs": "La respuesta es "
+    },
+    "toast":
+    {
+        "correct": "¡Respuesta correcta!",
+        "incorrect": "¡Respuesta incorrecta!",
+        "simplify": "¡Por favor, simplifica!",
+        "cantProcess": "Nuestro sistema no pudo procesar esa respuesta",
+        "stepComplete": "¡Paso completado!",
+        "provideAnswer": "Por favor, proporciona una respuesta."
+    }
+}

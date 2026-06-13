@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root, .Router, .Router > * {
+    min-height: 100vh;
+}
+
+footer {
+    position: sticky;
+    top: 100vh;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    font-family: 'Titillium Web', 'sans-serif';
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    :root {
+        scroll-behavior: smooth;
+    }
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.revealable {
+    opacity: 0.2;
+}
+
+.revealable.revealed {
+    opacity: 1;
+    transition: opacity 500ms ease;
+}
+
+blockquote {
+    position: relative;
+    margin: -0.4em 1em 1.4em;
+    padding: 0.6em 0.8em 0.6em 1em;
+    color: rgb(100, 100, 100);
+}
+
+blockquote:before {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    content: "";
+    width: 4px;
+    border-radius: 8px;
+    background: rgb(180, 184, 188);
+}
+
+.Toastify__toast-container--top-right {
+    top: 4.5em !important;
+    right: 0.5em !important;
+}

@@ -1,0 +1,46 @@
+{
+    "lessonSelection": 
+    {
+       "welcomeInstructor": "Välkommen, lärare!",
+       "welcomeTo": "Välkommen till",
+       "resetprogress": "Nollställ framsteg",
+       "select": "Vänligen välj en",
+       "course": "kurs",
+       "lessonplan": "lektionsplan",
+       "onlyselect": "Välj",
+       "aresure": "Är du säker?",
+       "reset": "Framsteg nollställt!"
+    },
+    "problem":
+    {
+        "NextProblem": "Nästa uppgift",
+        "PreviousProblem": "Föregående uppgift",
+        "Submit": "Skicka in",
+        "Feedback": "Återkoppling",
+        "Response": "Svar",
+        "Thanks": "Tack för din återkoppling!",
+        "Description": "Du får gärna skicka in feedback om du stöter på några buggar i denna uppgift. Skicka gärna all feedback om uppgiftens olika delar på en gång.",
+        "Derivative": "är en härledning av",
+        "Used": ", används under"
+    },
+    "platform":
+    {
+        "Mastery": "Bemästrande av lektionen: ",
+        "LoggedIn": "Utloggad"
+    },
+    "hintsystem": 
+    {
+        "hint": "Ledtråd ",
+        "answer": "Svar",
+        "answerIs": "Svaret är "
+    },
+    "toast":
+    {
+        "correct": "Rätt svar!",
+        "incorrect": "Fel svar!",
+        "simplify": "Vänligen förenkla!",
+        "cantProcess": "Vårt system kunde inte bearbeta det svaret",
+        "stepComplete": "Steg slutfört!",
+        "provideAnswer": "Vänligen ge ett svar."
+    }    
+}

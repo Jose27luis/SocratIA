@@ -1,0 +1,46 @@
+{
+    "lessonSelection": 
+    {
+       "welcomeInstructor": "Welcome Instructor!",
+       "welcomeTo": "Welcome to",
+       "resetprogress": "Reset Progress",
+       "select": "Please select a",
+       "course": "course",
+       "lessonplan": "lesson plan",
+       "onlyselect": "Select",
+       "aresure": "Are you sure?",
+       "reset": "Progress Reset!"
+    },
+    "problem":
+    {
+        "NextProblem": "Next Problem",
+        "PreviousProblem": "Previous Problem",
+        "Submit": "Submit",
+        "Feedback": "Feedback",
+        "Response": "Response",
+        "Thanks": "Thank you for your feedback!",
+        "Description": "Feel free to submit feedback about this problem if you encounter any bugs. Submit feedback for all parts of the problem at once.",
+        "Derivative": "is a derivative of",
+        "Used": ", used under"
+    },
+    "platform":
+    {
+        "Mastery": "Lesson Mastery: ",
+        "LoggedIn": "Not logged in"
+    },
+    "hintsystem": 
+    {
+        "hint": "Hint ",
+        "answer": "Answer",
+        "answerIs": "The answer is "
+    },
+    "toast":
+    {
+        "correct": "Correct Answer!",
+        "incorrect": "Incorrect Answer!",
+        "simplify": "Please simplify!",
+        "cantProcess": "Our system could not process that answer",
+        "stepComplete": "Step Completed!",
+        "provideAnswer": "Please provide an answer."
+    }
+}
