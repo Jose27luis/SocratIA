@@ -229,6 +229,33 @@ class Problem extends React.Component {
         }
     };
 
+    recordProgress = (kcArray, cardIndex, isCorrect) => {
+        if (!DYNAMIC_HINT_URL) {
+            return;
+        }
+        let studentId = localStorage.getItem("socrateai_student");
+        if (!studentId) {
+            studentId = "stu-" + Math.random().toString(36).slice(2, 12);
+            localStorage.setItem("socrateai_student", studentId);
+        }
+        const base = DYNAMIC_HINT_URL.replace(/\/dynamic-hint$/, "");
+        for (const kc of kcArray) {
+            const mastery = this.bktParams[kc] ? this.bktParams[kc].probMastery : null;
+            fetch(base + "/progress/attempt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    student: studentId,
+                    problem_id: this.context.problemID,
+                    step_id: String(cardIndex),
+                    skill: String(kc),
+                    correct: Boolean(isCorrect),
+                    mastery: mastery,
+                }),
+            }).catch(() => {});
+        }
+    };
+
     answerMade = (cardIndex, kcArray, isCorrect) => {
         const { stepStates, firstAttempts } = this.state;
         const { lesson, problem } = this.props;
@@ -263,6 +290,7 @@ class Problem extends React.Component {
                     update(this.bktParams[kc], isCorrect);
                 }
             }
+            this.recordProgress(_kcArray, cardIndex, isCorrect);
         }
 
         if (!this.context.debug) {
