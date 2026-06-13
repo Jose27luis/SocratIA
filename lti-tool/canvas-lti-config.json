@@ -1,0 +1,25 @@
+{
+  "title": "SócratIA",
+  "description": "Tutoría inteligente adaptativa con IA",
+  "oidc_initiation_url": "https://cms.net.pe/lti/login",
+  "target_link_uri": "https://cms.net.pe/lti/launch",
+  "public_jwk_url": "https://cms.net.pe/lti/jwks",
+  "scopes": [],
+  "extensions": [
+    {
+      "domain": "cms.net.pe",
+      "platform": "canvas.instructure.com",
+      "privacy_level": "public",
+      "settings": {
+        "text": "SócratIA",
+        "placements": [
+          {
+            "placement": "course_navigation",
+            "message_type": "LtiResourceLinkRequest",
+            "target_link_uri": "https://cms.net.pe/lti/launch"
+          }
+        ]
+      }
+    }
+  ]
+}
