@@ -4,6 +4,8 @@
 
 > Un tutor inteligente que, mediante *knowledge tracing*, estima en vivo el dominio del estudiante y le entrega pistas socráticas personalizadas generadas por IA, todo embebido dentro de Canvas LMS y con un panel de seguimiento para el docente.
 
+> Los diagramas de este documento usan **Mermaid**: GitHub los renderiza automáticamente como gráficos interactivos.
+
 ---
 
 ## Índice
@@ -84,32 +86,18 @@ El proyecto se construye sobre **OATutor** (UC Berkeley), un sistema tutor intel
 
 ### 5.1 Visión general
 
-```
-┌───────────────────────────────────────────────────────────────┐
-│                          CANVAS LMS                           │
-│            (curso, estudiantes, calificaciones)               │
-│                                                               │
-│   ┌───────────────────────────────────────────────────────┐  │
-│   │            SócratIA  (Herramienta LTI)                 │  │
-│   │                                                        │  │
-│   │   Frontend del tutor  ◄──────────►  Servicios de IA    │  │
-│   │   (interfaz embebida)              (motor adaptativo)  │  │
-│   └───────────────────────────────────────────────────────┘  │
-│             ▲                                   │             │
-└─────────────┼───────────────────────────────────┼────────────┘
-              │ LTI 1.3 / API de Canvas           │
-              ▼                                   ▼
-   ┌──────────────────────┐        ┌──────────────────────────────┐
-   │  Motor de Knowledge  │        │   Generador de pistas (LLM)   │
-   │  Tracing (dominio)   │        │   método socrático            │
-   └──────────────────────┘        └──────────────────────────────┘
-              │
-              ▼
-   ┌──────────────────────────────┐
-   │  Base de datos                │
-   │  (estado de dominio,          │
-   │   interacciones, contenido)   │
-   └──────────────────────────────┘
+```mermaid
+flowchart TB
+    Est(["Estudiante"]) -->|navegador| Canvas
+    subgraph Canvas["Canvas LMS"]
+        Tool["SócratIA · Herramienta LTI<br/>(Frontend del tutor)"]
+    end
+    Tool -->|LTI 1.3 / API| AIS["Servicio de IA · FastAPI<br/>(orquestador)"]
+    AIS --> BKT["Motor de Knowledge Tracing<br/>(dominio · BKT)"]
+    AIS --> LLM["Generador de pistas<br/>(LLM · Claude)"]
+    BKT --> DB[("PostgreSQL<br/>dominio · interacciones")]
+    LLM --> DB
+    Doc(["Docente"]) -->|panel| Tool
 ```
 
 ### 5.2 Componentes
@@ -195,32 +183,36 @@ Ver [§5.1](#51-visión-general).
 
 ### 7.2 Diagrama de secuencia (resolver un paso y recibir pista)
 
-```
-Estudiante      Frontend        Servicio IA       Motor BKT      Generador LLM
-    │              │                 │                │               │
-    │ responde     │                 │                │               │
-    │─────────────►│ envía intento   │                │               │
-    │              │────────────────►│ evalúa respuesta│              │
-    │              │                 │ ¿correcto?      │               │
-    │              │                 │────────────────►│ actualiza P(L)│
-    │              │                 │◄────────────────│ P(L) nuevo    │
-    │              │   si es error:  │                 │               │
-    │              │                 │────────────────────────────────►│ genera pista
-    │              │                 │◄────────────────────────────────│ pista socrática
-    │              │◄────────────────│ pista + dominio │               │
-    │◄─────────────│ muestra pista   │                 │               │
+```mermaid
+sequenceDiagram
+    actor Estudiante
+    participant FE as Frontend
+    participant IA as Servicio IA
+    participant BKT as Motor BKT
+    participant LLM as Generador LLM
+    Estudiante->>FE: Responde el ejercicio
+    FE->>IA: Envía intento
+    IA->>BKT: Evalúa y actualiza dominio
+    BKT-->>IA: P(L) actualizado
+    alt Respuesta incorrecta
+        IA->>LLM: Solicita pista (problema, error, dominio)
+        LLM-->>IA: Pista socrática
+    end
+    IA-->>FE: Pista + dominio
+    FE-->>Estudiante: Muestra la pista
 ```
 
-### 7.3 Diagrama de despliegue (resumen)
+### 7.3 Diagrama de despliegue
 
-```
-[Navegador del alumno] ──HTTPS──► [Canvas LMS] ──LTI──► [Frontend SócratIA (React)]
-                                                              │ API
-                                                              ▼
-                                              [Servicio de IA (FastAPI)]
-                                                ├── Motor BKT
-                                                ├── Generador LLM ──► [API de Claude]
-                                                └── [Base de datos PostgreSQL]
+```mermaid
+flowchart LR
+    Browser(["Navegador del alumno"]) -->|HTTPS| Canvas["Canvas LMS"]
+    Canvas -->|LTI| FE["Frontend SócratIA · React"]
+    FE -->|API| AIS["Servicio de IA · FastAPI"]
+    AIS --> BKT["Motor BKT"]
+    AIS --> LLM["Generador LLM"]
+    LLM -->|API| Claude["API de Claude"]
+    AIS --> DB[("PostgreSQL")]
 ```
 
 ---
@@ -234,19 +226,34 @@ Estudiante      Frontend        Servicio IA       Motor BKT      Generador LLM
 
 ### 8.2 Diagrama de casos de uso
 
+```mermaid
+flowchart LR
+    EST["O<br/>/|&bsol;<br/>/ &bsol;<br/><b>Estudiante</b>"]
+    DOC["O<br/>/|&bsol;<br/>/ &bsol;<br/><b>Docente</b>"]
+    SYS["O<br/>/|&bsol;<br/>/ &bsol;<br/><b>Sistema / IA</b>"]
+
+    UC1(["Ingresar vía Canvas / LTI"])
+    UC2(["Resolver ejercicio"])
+    UC3(["Recibir pista socrática"])
+    UC4(["Consultar mi progreso"])
+    UC5(["Ver panel del grupo"])
+    UC6(["Gestionar contenido"])
+    UC7(["Generar pista con IA"])
+    UC8(["Actualizar dominio · BKT"])
+
+    EST --- UC1
+    EST --- UC2
+    EST --- UC3
+    EST --- UC4
+    DOC --- UC5
+    DOC --- UC6
+    UC3 -. «include» .-> UC7
+    UC2 -. «include» .-> UC8
+    SYS --- UC7
+    SYS --- UC8
 ```
-                ┌──────────────────────────── SócratIA ───────────────────────────┐
-                │                                                                  │
-                │   (Ingresar vía Canvas/LTI)                                      │
-  Estudiante ───┼──►(Resolver ejercicio)                                           │
-       │        │   (Solicitar/recibir pista socrática)──include──►(Generar pista) │◄── Sistema/IA
-       │        │   (Consultar su progreso)                                        │
-                │                                                                  │
-   Docente ─────┼──►(Ver panel de progreso del grupo)                              │
-                │   (Gestionar contenido/ejercicios)                               │
-                │   (Actualizar dominio - BKT)◄────────────────────────────────────┼── Sistema/IA
-                └──────────────────────────────────────────────────────────────────┘
-```
+
+> Nota: los actores se representan con la figura clásica de UML (monigote). El "Sistema / IA" es un **actor de sistema** que ejecuta la actualización del dominio y la generación de pistas.
 
 ### 8.3 Especificación de casos de uso (principales)
 
