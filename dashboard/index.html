@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SócratIA · Panel del docente</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel2: #273449;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --ok: #34d399;
+      --bad: #f87171;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+    header h1 { margin: 0; font-size: 22px; }
+    header span { color: var(--muted); font-size: 14px; }
+    main { padding: 24px 32px; max-width: 1100px; margin: 0 auto; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+    .card .value { font-size: 30px; font-weight: 700; }
+    .card .label { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 12px; overflow: hidden; }
+    th, td { padding: 12px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+    tbody tr { cursor: pointer; transition: background 0.15s; }
+    tbody tr:hover { background: var(--panel2); }
+    .bar { height: 8px; border-radius: 4px; background: var(--border); position: relative; width: 120px; }
+    .bar > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--accent); }
+    .muted { color: var(--muted); }
+    .detail { margin-top: 28px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 22px; display: none; }
+    .detail.open { display: block; }
+    .detail h2 { margin: 0 0 4px; font-size: 18px; }
+    .detail h3 { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin: 22px 0 10px; }
+    .skill-row { display: flex; align-items: center; gap: 14px; padding: 6px 0; }
+    .skill-row .name { width: 200px; }
+    .skill-row .pct { width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+    .attempt { display: flex; gap: 12px; align-items: center; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+    .dot.ok { background: var(--ok); }
+    .dot.bad { background: var(--bad); }
+    .close { float: right; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+    .empty { color: var(--muted); padding: 40px; text-align: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SócratIA</h1>
+    <span>Panel del docente · progreso de los alumnos</span>
+  </header>
+  <main>
+    <div class="cards" id="cards"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Alumno</th>
+          <th>Intentos</th>
+          <th>Aciertos</th>
+          <th>% Acierto</th>
+          <th>Dominio promedio</th>
+          <th>Última actividad</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="detail" id="detail"></div>
+  </main>
+
+  <script type="module">
+    const API = "/ai";
+
+    function pct(part, total) {
+      if (!total) return 0;
+      return Math.round((part / total) * 100);
+    }
+
+    function masteryColor(value) {
+      if (value >= 0.7) return "var(--ok)";
+      if (value < 0.4) return "var(--bad)";
+      return "var(--accent)";
+    }
+
+    function bar(value) {
+      const width = Math.round((value ?? 0) * 100);
+      const color = masteryColor(value ?? 0);
+      return `<div class="bar"><span style="width:${width}%;background:${color}"></span></div>`;
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      return new Date(iso).toLocaleString("es-PE", { dateStyle: "short", timeStyle: "short" });
+    }
+
+    function renderCards(students) {
+      const total = students.length;
+      const attempts = students.reduce((a, s) => a + s.attemptsTotal, 0);
+      const correct = students.reduce((a, s) => a + s.correctTotal, 0);
+      document.getElementById("cards").innerHTML = `
+        <div class="card"><div class="value">${total}</div><div class="label">Alumnos</div></div>
+        <div class="card"><div class="value">${attempts}</div><div class="label">Intentos totales</div></div>
+        <div class="card"><div class="value">${pct(correct, attempts)}%</div><div class="label">Acierto global</div></div>`;
+    }
+
+    function renderRows(students) {
+      const tbody = document.getElementById("rows");
+      if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty">Aún no hay actividad de alumnos.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = students.map((s) => `
+        <tr data-id="${encodeURIComponent(s.externalId)}">
+          <td>${s.externalId}</td>
+          <td>${s.attemptsTotal}</td>
+          <td>${s.correctTotal}</td>
+          <td>${pct(s.correctTotal, s.attemptsTotal)}%</td>
+          <td>${bar(s.avgMastery)}</td>
+          <td class="muted">${fmtDate(s.lastActivity)}</td>
+        </tr>`).join("");
+      for (const tr of tbody.querySelectorAll("tr[data-id]")) {
+        tr.addEventListener("click", () => openDetail(tr.getAttribute("data-id")));
+      }
+    }
+
+    async function openDetail(id) {
+      const res = await fetch(`${API}/progress/${id}`);
+      const data = await res.json();
+      const detail = document.getElementById("detail");
+      const skills = data.mastery.map((m) => `
+        <div class="skill-row">
+          <div class="name">${m.skill}</div>
+          ${bar(m.mastery)}
+          <div class="pct">${Math.round(m.mastery * 100)}%</div>
+          <div class="muted">${m.attempts} intento(s)</div>
+        </div>`).join("") || `<div class="muted">Sin habilidades registradas.</div>`;
+      const recent = data.recent.map((a) => `
+        <div class="attempt">
+          <span class="dot ${a.correct ? "ok" : "bad"}"></span>
+          <span>${a.skill ?? "—"}</span>
+          <span class="muted">${a.problemId ?? ""}</span>
+          <span class="muted" style="margin-left:auto">${fmtDate(a.createdAt)}</span>
+        </div>`).join("") || `<div class="muted">Sin intentos.</div>`;
+      detail.innerHTML = `
+        <button class="close" id="closeDetail">Cerrar</button>
+        <h2>${decodeURIComponent(id)}</h2>
+        <div class="muted">${data.attemptsTotal} intentos · ${data.correctTotal} aciertos · ${pct(data.correctTotal, data.attemptsTotal)}% de acierto</div>
+        <h3>Dominio por habilidad</h3>
+        ${skills}
+        <h3>Actividad reciente</h3>
+        ${recent}`;
+      detail.classList.add("open");
+      document.getElementById("closeDetail").addEventListener("click", () => detail.classList.remove("open"));
+      detail.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function load() {
+      const res = await fetch(`${API}/students`);
+      const students = await res.json();
+      renderCards(students);
+      renderRows(students);
+    }
+
+    load().catch((error) => {
+      document.getElementById("rows").innerHTML =
+        `<tr><td colspan="6" class="empty">Error cargando datos: ${error.message}</td></tr>`;
+    });
+  </script>
+</body>
+</html>
