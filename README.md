@@ -92,7 +92,7 @@ flowchart TB
     subgraph Canvas["Canvas LMS"]
         Tool["SócratIA · Herramienta LTI<br/>(Frontend del tutor)"]
     end
-    Tool -->|LTI 1.3 / API| AIS["Servicio de IA · FastAPI<br/>(orquestador)"]
+    Tool -->|LTI 1.3 / API| AIS["Backend · Node + TypeScript<br/>(orquestador)"]
     AIS --> BKT["Motor de Knowledge Tracing<br/>(dominio · BKT)"]
     AIS --> LLM["Generador de pistas<br/>(LLM · Claude)"]
     BKT --> DB[("PostgreSQL<br/>dominio · interacciones")]
@@ -105,7 +105,7 @@ flowchart TB
 | Componente | Responsabilidad |
 |---|---|
 | **Frontend del tutor** | Interfaz embebida en Canvas donde el alumno resuelve ejercicios y recibe pistas (React). |
-| **Servicio de IA** | Orquesta el flujo: recibe la respuesta, consulta el dominio y pide la pista (Python/FastAPI). |
+| **Servicio de IA** | Orquesta el flujo: recibe la respuesta, consulta el dominio y pide la pista (Node + TypeScript). |
 | **Motor de Knowledge Tracing** | Estima y actualiza el dominio por habilidad (BKT). |
 | **Generador de pistas (LLM)** | Produce la pista socrática personalizada (Claude). |
 | **Panel docente** | Visualiza progreso y alertas del grupo. |
@@ -208,7 +208,7 @@ sequenceDiagram
 flowchart LR
     Browser(["Navegador del alumno"]) -->|HTTPS| Canvas["Canvas LMS"]
     Canvas -->|LTI| FE["Frontend SócratIA · React"]
-    FE -->|API| AIS["Servicio de IA · FastAPI"]
+    FE -->|API| AIS["Backend · Node + TypeScript"]
     AIS --> BKT["Motor BKT"]
     AIS --> LLM["Generador LLM"]
     LLM -->|API| Claude["API de Claude"]
@@ -301,9 +301,10 @@ flowchart LR
 | **LMS base** | Canvas LMS (open source / Canvas Free for Teacher) |
 | **Integración** | LTI 1.3 (Advantage) + API REST/GraphQL de Canvas |
 | **Frontend del tutor** | React (base OATutor) |
-| **Servicios de IA** | Python + FastAPI |
+| **Backend (IA + progreso)** | Node + TypeScript (Fastify), tipado estricto |
 | **Knowledge Tracing** | BKT (base OATutor); opcional pyKT / EduKTM |
-| **LLM (pistas socráticas)** | Claude (Anthropic) |
+| **LLM (pistas socráticas)** | Claude Haiku 4.5 (Anthropic) |
+| **Panel docente** | HTML + JS (servido por nginx en `/docente`) |
 | **Base de datos** | PostgreSQL |
 
 ---
@@ -313,7 +314,9 @@ flowchart LR
 ```
 SocratIA/
 ├── OATutor/           Base del tutor inteligente (React + BKT + contenido)
-├── ai-service/        Servicios de IA (FastAPI): generación de pistas con LLM
+├── backend/           Backend Node + TypeScript: pistas con LLM y progreso (PostgreSQL)
+│   └── src/           config · types · parse · repository · tutor · routes · server
+├── dashboard/         Panel del docente (HTML/JS), servido en /docente
 ├── lti-tool/          Integración LTI con Canvas
 ├── README.md          Documento de diseño (este archivo)
 ```
@@ -322,12 +325,13 @@ SocratIA/
 
 ## 12. Roadmap
 
+- [x] Ejecutar OATutor como base del tutor.
+- [x] Implementar el backend que genera pistas socráticas con un LLM (Claude Haiku 4.5).
+- [x] Conectar las pistas dinámicas dentro del flujo del tutor.
+- [x] Registrar el progreso del alumno (intentos y dominio) en PostgreSQL.
+- [x] Desarrollar el panel docente.
 - [ ] Levantar Canvas (Free for Teacher o Docker) y registrar una herramienta LTI de prueba.
-- [ ] Ejecutar OATutor como base del tutor (hecho en entorno local).
-- [ ] Implementar el servicio de IA que genera pistas socráticas con un LLM.
-- [ ] Conectar las pistas dinámicas dentro del flujo del tutor.
 - [ ] Integrar el tutor a Canvas vía LTI.
-- [ ] Desarrollar el panel docente.
 - [ ] Pruebas con un curso piloto.
 
 ---
