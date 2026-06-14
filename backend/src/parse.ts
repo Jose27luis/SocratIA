@@ -103,6 +103,35 @@ export function parseChat(body: unknown): ChatBody {
   };
 }
 
+export function parsePublish(body: unknown): {
+  lesson: string;
+  language: string;
+  problems: { title: string; body: string; stepTitle: string; answer: string; choices: string[] }[];
+} {
+  const obj = asObject(body);
+  const problemsRaw = obj["problems"];
+  if (!Array.isArray(problemsRaw)) {
+    throw new ValidationError("Campo invalido o ausente: problems");
+  }
+  return {
+    lesson: typeof obj["lesson"] === "string" && obj["lesson"] !== "" ? obj["lesson"] : "Lección generada",
+    language: typeof obj["language"] === "string" ? obj["language"] : "es",
+    problems: problemsRaw.map((item) => {
+      const p = item as Record<string, unknown>;
+      const choices = Array.isArray(p["choices"])
+        ? p["choices"].filter((c): c is string => typeof c === "string")
+        : [];
+      return {
+        title: typeof p["title"] === "string" ? p["title"] : "",
+        body: typeof p["body"] === "string" ? p["body"] : "",
+        stepTitle: typeof p["stepTitle"] === "string" ? p["stepTitle"] : "",
+        answer: typeof p["answer"] === "string" ? p["answer"] : "",
+        choices,
+      };
+    }),
+  };
+}
+
 export function parseGenerate(body: unknown): GenerateBody {
   const obj = asObject(body);
   const count = obj["count"];

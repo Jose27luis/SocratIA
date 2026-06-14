@@ -8,9 +8,11 @@ import {
   parseGenerate,
   parseHintRequest,
   parseMisconception,
+  parsePublish,
   parseReinforcement,
   parseTranslate,
 } from "./parse.js";
+import { publishLesson } from "./publish.js";
 import {
   getMisconceptions,
   getProgress,
@@ -135,5 +137,11 @@ export function registerRoutes(app: FastifyInstance): void {
     const body = parseGenerate(request.body);
     const generated = await generateProblems(body);
     return generated;
+  });
+
+  app.post("/publish-lesson", async (request) => {
+    const body = parsePublish(request.body);
+    const result = await publishLesson(body);
+    return { status: "publicando", ...result };
   });
 }

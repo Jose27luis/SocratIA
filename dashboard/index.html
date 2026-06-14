@@ -410,14 +410,16 @@
     });
 
     // generator
+    let lastGenerated=null;
     document.getElementById("genRun").addEventListener("click",async(e)=>{
       const btn=e.target, topic=document.getElementById("genTopic").value.trim(), result=document.getElementById("genResult");
       if(!topic){ result.innerHTML='<div class="muted">Escribe un tema.</div>'; return; }
-      btn.disabled=true; btn.textContent="Generando…";
+      btn.disabled=true; btn.textContent="Generando…"; lastGenerated=null;
       result.innerHTML='<div class="muted" style="margin-top:14px">Creando ejercicios con IA…</div>';
       try{
         const d=await (await fetch(`${API}/generate-problem`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,level:document.getElementById("genLevel").value.trim()||"básico",language:document.getElementById("genLang").value,count:Number(document.getElementById("genCount").value)||3})})).json();
         const probs=Array.isArray(d.problems)?d.problems:[];
+        lastGenerated={lesson:d.lesson||topic, language:document.getElementById("genLang").value, problems:probs};
         result.innerHTML=`<div class="sec-title" style="margin-top:18px">Lección: ${d.lesson||topic}</div>`+probs.map(p=>`
           <div class="gen-problem">
             <div class="skill">${p.skill||""}</div>
@@ -426,9 +428,31 @@
             <div class="q">${p.stepTitle||""}</div>
             ${(p.choices||[]).map(c=>`<div class="gen-choice ${c===p.answer?"correct":""}">${c}${c===p.answer?"  ✓":""}</div>`).join("")}
           </div>`).join("")||'<div class="muted">No se generaron ejercicios.</div>';
+        if(probs.length){
+          result.innerHTML+=`<div style="margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="publishBtn">Publicar al tutor</button>
+            <span class="muted" style="font-size:13px">Quedará jugable para los alumnos en ~2-3 min.</span>
+            <span id="publishMsg"></span></div>`;
+          document.getElementById("publishBtn").addEventListener("click",publishToTutor);
+        }
       }catch(err){ result.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
       btn.disabled=false; btn.textContent="Generar";
     });
+
+    async function publishToTutor(e){
+      const btn=e.target, msg=document.getElementById("publishMsg");
+      if(!lastGenerated){ return; }
+      btn.disabled=true; btn.textContent="Publicando…";
+      msg.innerHTML='<span class="muted" style="font-size:13px">Escribiendo el contenido y reconstruyendo el tutor…</span>';
+      try{
+        const r=await fetch(`${API}/publish-lesson`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lastGenerated)});
+        const d=await r.json();
+        if(d.status==="publicando"){
+          msg.innerHTML=`<span class="pill ok">✓ Publicando ${d.count} ejercicio(s) · listo en ~2-3 min en el curso "SócratIA · Generados"</span>`;
+          btn.textContent="Publicado";
+        } else { msg.innerHTML=`<span class="muted">${d.error||"No se pudo publicar."}</span>`; btn.disabled=false; btn.textContent="Publicar al tutor"; }
+      }catch(err){ msg.innerHTML=`<span class="muted">Error: ${err.message}</span>`; btn.disabled=false; btn.textContent="Publicar al tutor"; }
+    }
 
     async function load(){
       try{

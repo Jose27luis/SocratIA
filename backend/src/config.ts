@@ -14,6 +14,7 @@ export interface Config {
   readonly model: string;
   readonly anthropicApiKey: string;
   readonly databaseUrl: string;
+  readonly oatutorDir: string;
 }
 
 export const config: Config = {
@@ -22,4 +23,5 @@ export const config: Config = {
   model: process.env.MODEL ?? "claude-haiku-4-5",
   anthropicApiKey: required("ANTHROPIC_API_KEY"),
   databaseUrl: required("DATABASE_URL"),
+  oatutorDir: process.env.OATUTOR_DIR ?? "/var/www/SocratIA/OATutor",
 };
