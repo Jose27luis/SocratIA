@@ -12,6 +12,7 @@ import {
     renderText,
 } from "../../platform-logic/renderText.js";
 import { translateBatch, translationEnabled } from "../../platform-logic/translate.js";
+import TutorChat from "../TutorChat.js";
 import styles from "./common-styles.js";
 import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/TextField";
@@ -811,6 +812,7 @@ class Problem extends React.Component {
                         ""
                     )}
                 </footer>
+                <TutorChat problem={problem} />
             </>
         );
     }

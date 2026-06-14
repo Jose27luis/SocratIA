@@ -154,6 +154,7 @@ class ProblemCard extends React.Component {
             isGeneratingHint: false,
             lastAIHintHash: null,
             translated: null,
+            reinforcement: "",
         };
 
          // This is used for AI hint generation
@@ -313,6 +314,54 @@ class ProblemCard extends React.Component {
             checkMarkOpacity: isCorrect ? "100" : "0",
         });
         answerMade(this.index, knowledgeComponents, isCorrect);
+        this.runAIOnSubmit(isCorrect, inputVal);
+    };
+
+    aiBaseUrl = () => {
+        return DYNAMIC_HINT_URL ? DYNAMIC_HINT_URL.replace(/\/dynamic-hint$/, "") : "";
+    };
+
+    runAIOnSubmit = (isCorrect, studentAnswer) => {
+        const base = this.aiBaseUrl();
+        if (!base) {
+            return;
+        }
+        const problemText = (this.step.stepTitle || "") + " " + (this.step.stepBody || "");
+        const expected = Array.isArray(this.step.stepAnswer)
+            ? this.step.stepAnswer[0]
+            : this.step.stepAnswer;
+        const skill = Array.isArray(this.step.knowledgeComponents)
+            ? this.step.knowledgeComponents[0]
+            : null;
+
+        if (isCorrect) {
+            fetch(base + "/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    problem: problemText,
+                    step: this.step.stepTitle || "",
+                    student_answer: String(studentAnswer),
+                }),
+            })
+                .then((r) => r.json())
+                .then((d) => this.setState({ reinforcement: d.feedback || "" }))
+                .catch(() => {});
+        } else {
+            const studentId = localStorage.getItem("socrateai_student");
+            fetch(base + "/misconception", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    student: studentId,
+                    skill: skill,
+                    problem: problemText,
+                    step: this.step.stepTitle || "",
+                    correct_answer: String(expected || ""),
+                    student_answer: String(studentAnswer),
+                }),
+            }).catch(() => {});
+        }
     };
 
     editInput = (event) => {
@@ -752,6 +801,19 @@ class ProblemCard extends React.Component {
                             index={this.props.index}
                         />
                     </div>
+                    {this.state.reinforcement && (
+                        <div style={{
+                            margin: "12px 0 0",
+                            padding: "12px 16px",
+                            background: "#ecfdf5",
+                            border: "1px solid #a7f3d0",
+                            borderRadius: 12,
+                            color: "#065f46",
+                            lineHeight: 1.5,
+                        }}>
+                            <strong>¡Bien hecho! </strong>{this.state.reinforcement}
+                        </div>
+                    )}
                 </CardContent>
                 <CardActions>
                     <Grid
