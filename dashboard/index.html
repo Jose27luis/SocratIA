@@ -58,6 +58,15 @@
     .dot.bad { background: var(--bad); }
     .close { float: right; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
     .empty { color: var(--muted); padding: 40px; text-align: center; }
+    .btn-ai { background: linear-gradient(135deg, #6d28d9, #4c1d95); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 14px rgba(109,40,217,0.3); }
+    .btn-ai:hover { box-shadow: 0 6px 20px rgba(109,40,217,0.45); }
+    .btn-ai:disabled { opacity: 0.6; cursor: progress; }
+    .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+    .ai-box { margin-top: 16px; background: #faf8ff; border: 1px solid #e6def9; border-radius: 12px; padding: 18px 22px; line-height: 1.6; }
+    .ai-box h1, .ai-box h2, .ai-box h3 { color: #4c1d95; margin: 10px 0 6px; font-size: 15px; }
+    .ai-box ul { margin: 6px 0; padding-left: 20px; }
+    .ai-box strong { color: #1f1b2e; }
+    .ai-tag { display: inline-block; font-size: 11px; font-weight: 700; color: #6d28d9; background: #ede9fe; border-radius: 6px; padding: 2px 8px; margin-bottom: 8px; letter-spacing: 0.03em; }
   </style>
 </head>
 <body>
@@ -67,6 +76,10 @@
   </header>
   <main>
     <div class="cards" id="cards"></div>
+    <div class="toolbar">
+      <button class="btn-ai" id="reportBtn">Generar reporte del grupo con IA</button>
+    </div>
+    <div class="ai-box" id="reportBox" style="display:none"></div>
     <table>
       <thead>
         <tr>
@@ -85,6 +98,28 @@
 
   <script type="module">
     const API = "/ai";
+
+    function renderMarkdown(md) {
+      const lines = md.split("\n");
+      let html = "";
+      let inList = false;
+      for (let line of lines) {
+        line = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        const bullet = line.match(/^\s*[-*]\s+(.*)/);
+        if (bullet) {
+          if (!inList) { html += "<ul>"; inList = true; }
+          html += `<li>${bullet[1]}</li>`;
+          continue;
+        }
+        if (inList) { html += "</ul>"; inList = false; }
+        const h = line.match(/^(#{1,3})\s+(.*)/);
+        if (h) { const n = h[1].length; html += `<h${n}>${h[2]}</h${n}>`; }
+        else if (line.trim() === "") { html += ""; }
+        else { html += `<p style="margin:6px 0">${line}</p>`; }
+      }
+      if (inList) html += "</ul>";
+      return html;
+    }
 
     function pct(part, total) {
       if (!total) return 0;
@@ -163,11 +198,49 @@
         <h3>Dominio por habilidad</h3>
         ${skills}
         <h3>Actividad reciente</h3>
-        ${recent}`;
+        ${recent}
+        <h3>Diagnóstico con IA</h3>
+        <button class="btn-ai" id="diagnoseBtn">Generar diagnóstico de este alumno</button>
+        <div class="ai-box" id="diagnoseBox" style="display:none"></div>`;
       detail.classList.add("open");
       document.getElementById("closeDetail").addEventListener("click", () => detail.classList.remove("open"));
+      document.getElementById("diagnoseBtn").addEventListener("click", async (e) => {
+        const btn = e.target;
+        const box = document.getElementById("diagnoseBox");
+        btn.disabled = true;
+        btn.textContent = "Analizando…";
+        box.style.display = "block";
+        box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span><div class="muted">Generando diagnóstico…</div>';
+        try {
+          const r = await fetch(`${API}/diagnose/${encodeURIComponent(id)}`);
+          const d = await r.json();
+          box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span>' + renderMarkdown(d.diagnosis || "Sin datos suficientes.");
+        } catch (err) {
+          box.innerHTML = `<div class="muted">Error: ${err.message}</div>`;
+        }
+        btn.textContent = "Regenerar diagnóstico";
+        btn.disabled = false;
+      });
       detail.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+
+    document.getElementById("reportBtn").addEventListener("click", async (e) => {
+      const btn = e.target;
+      const box = document.getElementById("reportBox");
+      btn.disabled = true;
+      btn.textContent = "Analizando el grupo…";
+      box.style.display = "block";
+      box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span><div class="muted">Generando reporte…</div>';
+      try {
+        const r = await fetch(`${API}/class-report`);
+        const d = await r.json();
+        box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span>' + renderMarkdown(d.report || "Sin datos.");
+      } catch (err) {
+        box.innerHTML = `<div class="muted">Error: ${err.message}</div>`;
+      }
+      btn.textContent = "Regenerar reporte del grupo";
+      btn.disabled = false;
+    });
 
     async function load() {
       const res = await fetch(`${API}/students`);
