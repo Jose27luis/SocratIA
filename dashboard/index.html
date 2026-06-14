@@ -67,6 +67,15 @@
     .ai-box ul { margin: 6px 0; padding-left: 20px; }
     .ai-box strong { color: #1f1b2e; }
     .ai-tag { display: inline-block; font-size: 11px; font-weight: 700; color: #6d28d9; background: #ede9fe; border-radius: 6px; padding: 2px 8px; margin-bottom: 8px; letter-spacing: 0.03em; }
+    .gen-form { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+    .gen-form input, .gen-form select { border: 1px solid #e0dcec; border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit; }
+    .gen-form input#genTopic { flex: 1; min-width: 200px; }
+    .gen-form input#genCount { width: 70px; }
+    .gen-problem { background: #fff; border: 1px solid #e6def9; border-radius: 10px; padding: 14px 16px; margin-top: 10px; }
+    .gen-problem .q { font-weight: 600; color: #1f1b2e; margin: 6px 0; }
+    .gen-problem .skill { font-size: 12px; color: #6d28d9; }
+    .gen-choice { padding: 4px 10px; margin: 3px 0; border-radius: 6px; font-size: 14px; }
+    .gen-choice.correct { background: #ecfdf5; color: #065f46; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -77,7 +86,24 @@
   <main>
     <div class="cards" id="cards"></div>
     <div class="toolbar">
+      <button class="btn-ai" id="genBtn">Generar ejercicios con IA</button>
       <button class="btn-ai" id="reportBtn">Generar reporte del grupo con IA</button>
+    </div>
+    <div class="ai-box" id="genBox" style="display:none">
+      <span class="ai-tag">SÓCRATIA · GENERADOR</span>
+      <div class="gen-form">
+        <input id="genTopic" placeholder="Tema (ej. ecuaciones lineales)" />
+        <input id="genLevel" placeholder="Nivel (ej. secundaria)" value="secundaria" />
+        <input id="genCount" type="number" min="1" max="6" value="3" title="Cantidad" />
+        <select id="genLang">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+          <option value="quechua">Runa Simi (Quechua)</option>
+        </select>
+        <button class="btn-ai" id="genRun">Generar</button>
+      </div>
+      <div id="genResult"></div>
     </div>
     <div class="ai-box" id="reportBox" style="display:none"></div>
     <table>
@@ -223,6 +249,45 @@
       });
       detail.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+
+    document.getElementById("genBtn").addEventListener("click", () => {
+      const box = document.getElementById("genBox");
+      box.style.display = box.style.display === "none" ? "block" : "none";
+    });
+
+    document.getElementById("genRun").addEventListener("click", async (e) => {
+      const btn = e.target;
+      const topic = document.getElementById("genTopic").value.trim();
+      const result = document.getElementById("genResult");
+      if (!topic) { result.innerHTML = '<div class="muted">Escribe un tema.</div>'; return; }
+      btn.disabled = true; btn.textContent = "Generando…";
+      result.innerHTML = '<div class="muted">Creando ejercicios con IA…</div>';
+      try {
+        const r = await fetch(`${API}/generate-problem`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            topic,
+            level: document.getElementById("genLevel").value.trim() || "básico",
+            language: document.getElementById("genLang").value,
+            count: Number(document.getElementById("genCount").value) || 3,
+          }),
+        });
+        const d = await r.json();
+        const probs = Array.isArray(d.problems) ? d.problems : [];
+        result.innerHTML = `<h3>Lección: ${d.lesson || topic}</h3>` + probs.map((p) => `
+          <div class="gen-problem">
+            <div class="skill">${p.skill || ""}</div>
+            <div><strong>${p.title || ""}</strong></div>
+            <div>${p.body || ""}</div>
+            <div class="q">${p.stepTitle || ""}</div>
+            ${(p.choices || []).map((c) => `<div class="gen-choice ${c === p.answer ? "correct" : ""}">${c}${c === p.answer ? "  ✓" : ""}</div>`).join("")}
+          </div>`).join("") || '<div class="muted">No se generaron ejercicios.</div>';
+      } catch (err) {
+        result.innerHTML = `<div class="muted">Error: ${err.message}</div>`;
+      }
+      btn.disabled = false; btn.textContent = "Generar";
+    });
 
     document.getElementById("reportBtn").addEventListener("click", async (e) => {
       const btn = e.target;
