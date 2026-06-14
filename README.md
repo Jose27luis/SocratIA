@@ -330,8 +330,8 @@ SocratIA/
 - [x] Conectar las pistas dinámicas dentro del flujo del tutor.
 - [x] Registrar el progreso del alumno (intentos y dominio) en PostgreSQL.
 - [x] Desarrollar el panel docente.
-- [ ] Levantar Canvas (Free for Teacher o Docker) y registrar una herramienta LTI de prueba.
-- [ ] Integrar el tutor a Canvas vía LTI.
+- [x] Levantar Canvas en Docker y registrar la herramienta LTI 1.3.
+- [x] Integrar el tutor a Canvas vía LTI (login OIDC, launch con validación de JWT, ruteo por rol).
 - [ ] Pruebas con un curso piloto.
 
 ---
