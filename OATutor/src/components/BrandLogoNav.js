@@ -18,7 +18,7 @@ function BrandLogoNav({ isPrivileged = false, noLink = false }) {
     const history = useHistory()
 
     const classes = useStyles()
-    const brandString = `${SITE_NAME} (v${SITE_VERSION})`
+    const brandString = SITE_NAME
 
     const navigateLink = (evt) => {
         if (evt.type === "click" || evt.key === "Enter") {

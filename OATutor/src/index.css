@@ -1,6 +1,7 @@
 body {
     margin: 0;
     padding: 0;
+    background-color: #f6f5fb;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -18,7 +19,7 @@ footer {
 *::before,
 *::after {
     box-sizing: border-box;
-    font-family: 'Titillium Web', 'sans-serif';
+    font-family: 'Poppins', 'Inter', 'Titillium Web', sans-serif;
 }
 
 @media (prefers-reduced-motion: no-preference) {

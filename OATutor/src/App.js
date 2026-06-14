@@ -51,7 +51,91 @@ import BrowserStorage from "./util/browserStorage";
 
 loadFirebaseEnvConfig(config);
 
-let theme = createTheme();
+let theme = createTheme({
+    palette: {
+        primary: {
+            main: "#6d28d9",
+            dark: "#4c1d95",
+            light: "#8b5cf6",
+            contrastText: "#ffffff",
+        },
+        secondary: {
+            main: "#06b6d4",
+            dark: "#0e7490",
+            light: "#67e8f9",
+            contrastText: "#ffffff",
+        },
+        background: {
+            default: "#f6f5fb",
+            paper: "#ffffff",
+        },
+        text: {
+            primary: "#1f1b2e",
+            secondary: "#5b5670",
+        },
+    },
+    shape: {
+        borderRadius: 12,
+    },
+    typography: {
+        fontFamily: "'Poppins', 'Inter', 'Helvetica', 'Arial', sans-serif",
+        h1: { fontWeight: 700 },
+        h2: { fontWeight: 700 },
+        h3: { fontWeight: 600 },
+        h4: { fontWeight: 600 },
+        h5: { fontWeight: 600 },
+        h6: { fontWeight: 600 },
+        button: { fontWeight: 600, textTransform: "none" },
+    },
+    props: {
+        MuiButton: { disableElevation: true },
+        MuiPaper: { elevation: 0 },
+    },
+    overrides: {
+        MuiButton: {
+            root: {
+                borderRadius: 10,
+                paddingLeft: 18,
+                paddingRight: 18,
+            },
+            containedPrimary: {
+                boxShadow: "0 4px 14px rgba(109, 40, 217, 0.25)",
+                "&:hover": {
+                    boxShadow: "0 6px 20px rgba(109, 40, 217, 0.35)",
+                },
+            },
+        },
+        MuiPaper: {
+            rounded: {
+                borderRadius: 16,
+            },
+            outlined: {
+                border: "1px solid #ece9f5",
+            },
+        },
+        MuiCard: {
+            root: {
+                borderRadius: 16,
+                border: "1px solid #ece9f5",
+                boxShadow: "0 6px 24px rgba(31, 27, 46, 0.06)",
+                transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 12px 32px rgba(109, 40, 217, 0.12)",
+                },
+            },
+        },
+        MuiAppBar: {
+            colorPrimary: {
+                backgroundImage: "linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%)",
+            },
+        },
+        MuiLinearProgress: {
+            root: { borderRadius: 6, height: 8 },
+            bar: { borderRadius: 6 },
+        },
+    },
+});
 theme = responsiveFontSizes(theme);
 
 const queryParamToContext = {
