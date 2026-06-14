@@ -105,6 +105,11 @@ const HELP_DOCUMENT =
 
 const DYNAMIC_HINT_URL = process.env.REACT_APP_AI_HINT_URL || process.env.AI_HINT_GENERATION_AWS_ENDPOINT;
 
+const TRANSLATE_TARGET = process.env.REACT_APP_TRANSLATE_TO || "";
+const TRANSLATE_URL = DYNAMIC_HINT_URL
+    ? DYNAMIC_HINT_URL.replace(/\/dynamic-hint$/, "/translate")
+    : "";
+
 const DYNAMIC_HINT_TEMPLATE =
     "<{problem_title}.> <{problem_subtitle}.> <{question_title}.> <{question_subtitle}.> <Student's answer is: {student_answer}.> <The correct answer is: {correct_answer}.> Please give a hint for this.";
 
@@ -156,6 +161,8 @@ export {
     EQUATION_EDITOR_AUTO_OPERATORS,
     MIDDLEWARE_URL,
     DYNAMIC_HINT_URL,
+    TRANSLATE_TARGET,
+    TRANSLATE_URL,
     DYNAMIC_HINT_TEMPLATE,
     MASTERY_THRESHOLD,
     USER_ID_STORAGE_KEY,

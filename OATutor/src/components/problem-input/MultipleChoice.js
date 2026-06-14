@@ -22,7 +22,7 @@ class MultipleChoice extends React.Component {
     };
 
     render() {
-        let { choices: _choices = [], variabilization } = this.props;
+        let { choices: _choices = [], variabilization, translatedChoices } = this.props;
 
         const choices = []
         if (Array.isArray(_choices)) {
@@ -42,7 +42,9 @@ class MultipleChoice extends React.Component {
                         {choices.length > 0
                             ? choices.map((choice, i) =>
                                 <FormControlLabel value={choice} control={<Radio/>}
-                                    label={renderText(choice, null, variabilization, this.context)}
+                                    label={renderText(
+                                        (translatedChoices && translatedChoices[choice]) || choice,
+                                        null, variabilization, this.context)}
                                     key={choice}/>)
                             : "Error: This problem has no answer choices. Please submit feedback."}
                     </RadioGroup>

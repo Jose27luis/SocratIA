@@ -11,6 +11,7 @@ import {
     chooseVariables,
     renderText,
 } from "../../platform-logic/renderText.js";
+import { translateBatch, translationEnabled } from "../../platform-logic/translate.js";
 import styles from "./common-styles.js";
 import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/TextField";
@@ -82,13 +83,27 @@ class Problem extends React.Component {
             showFeedback: false,
             feedback: "",
             feedbackSubmitted: false,
-            showPopup: false
+            showPopup: false,
+            translatedProblem: null
         };
     }
+
+    translateProblem = async () => {
+        if (!translationEnabled()) {
+            return;
+        }
+        const problem = this.props.problem;
+        if (!problem) {
+            return;
+        }
+        const [title, body] = await translateBatch([problem.title || "", problem.body || ""]);
+        this.setState({ translatedProblem: { title, body } });
+    };
 
     componentDidMount() {
         const { lesson, setLanguage } = this.props;
         if (lesson) setLanguage(lesson.language);
+        this.translateProblem();
 
         document["oats-meta-courseName"] = lesson?.courseName || "";
         document["oats-meta-textbookName"] =
@@ -480,7 +495,7 @@ class Problem extends React.Component {
                             >
                                 <h1 className={classes.problemHeader}>
                                     {renderText(
-                                        problem.title,
+                                        this.state.translatedProblem?.title ?? problem.title,
                                         problem.id,
                                         chooseVariables(
                                             problem.variabilization,
@@ -492,7 +507,7 @@ class Problem extends React.Component {
                                 </h1>
                                 <div className={classes.problemBody}>
                                     {renderText(
-                                        problem.body,
+                                        this.state.translatedProblem?.body ?? problem.body,
                                         problem.id,
                                         chooseVariables(
                                             problem.variabilization,

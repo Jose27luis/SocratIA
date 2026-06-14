@@ -16,6 +16,7 @@ import {
     chooseVariables,
     renderText,
 } from "../../platform-logic/renderText.js";
+import { translateBatch, translationEnabled } from "../../platform-logic/translate.js";
 import {
     DYNAMIC_HINT_URL,
     DYNAMIC_HINT_TEMPLATE,
@@ -150,8 +151,9 @@ class ProblemCard extends React.Component {
             activeHintType: "none", // "none", or "normal".
             hints: this.hints,
             // When we are currently streaming the response from ChatGPT, this variable is `true`
-            isGeneratingHint: false, 
+            isGeneratingHint: false,
             lastAIHintHash: null,
+            translated: null,
         };
 
          // This is used for AI hint generation
@@ -209,8 +211,28 @@ class ProblemCard extends React.Component {
     componentDidMount() {
         // Start an asynchronous task
         this.updateBioInfo();
-        console.log("student show hints status: ", this.showHints);
+        this.translateStep();
     }
+
+    translateStep = async () => {
+        if (!translationEnabled()) {
+            return;
+        }
+        const choices = Array.isArray(this.step.choices) ? this.step.choices : [];
+        const sources = [this.step.stepTitle || "", this.step.stepBody || "", ...choices];
+        const translated = await translateBatch(sources);
+        const choiceMap = {};
+        choices.forEach((choice, i) => {
+            choiceMap[choice] = translated[i + 2];
+        });
+        this.setState({
+            translated: {
+                stepTitle: translated[0],
+                stepBody: translated[1],
+                choiceMap,
+            },
+        });
+    };
 
     componentDidUpdate(prevProps) {
         // Check if specific props have changed
@@ -634,7 +656,7 @@ class ProblemCard extends React.Component {
                 <CardContent>
                     <h2 className={classes.stepHeader}>
                         {renderText(
-                            this.step.stepTitle,
+                            this.state.translated?.stepTitle ?? this.step.stepTitle,
                             problemID,
                             chooseVariables(
                                 Object.assign(
@@ -651,7 +673,7 @@ class ProblemCard extends React.Component {
 
                     <div className={classes.stepBody}>
                         {renderText(
-                            this.step.stepBody,
+                            this.state.translated?.stepBody ?? this.step.stepBody,
                             problemID,
                             chooseVariables(
                                 Object.assign(
@@ -721,6 +743,7 @@ class ProblemCard extends React.Component {
                             seed={this.props.seed}
                             keepMCOrder={this.props.keepMCOrder}
                             keyboardType={this.props.keyboardType}
+                            translatedChoices={this.state.translated?.choiceMap}
                             _setState={(state) => this.setState(state)}
                             context={this.context}
                             editInput={this.editInput}

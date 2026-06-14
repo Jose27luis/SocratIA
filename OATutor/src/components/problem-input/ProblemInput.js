@@ -248,6 +248,7 @@ class ProblemInput extends React.Component {
                         <MultipleChoice
                             onChange={(evt) => this.props.editInput(evt)}
                             choices={[...this.props.step.choices].reverse()}
+                            translatedChoices={this.props.translatedChoices}
                             index={index}
                             {...(use_expanded_view && debug) ? {
                                 defaultValue: correctAnswer
@@ -259,6 +260,7 @@ class ProblemInput extends React.Component {
                         <MultipleChoice
                             onChange={(evt) => this.props.editInput(evt)}
                             choices={shuffleArray(this.props.step.choices, this.props.seed)}
+                            translatedChoices={this.props.translatedChoices}
                             index={index}
                             {...(use_expanded_view && debug) ? {
                                 defaultValue: correctAnswer
