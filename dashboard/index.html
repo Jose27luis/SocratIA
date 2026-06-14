@@ -3,321 +3,443 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SócratIA · Panel del docente</title>
+  <title>SócratIA · Panel docente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #1e293b;
-      --panel2: #273449;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --ok: #34d399;
-      --bad: #f87171;
-      --border: #334155;
+      --ink: #15101f;
+      --ink-2: #4a4458;
+      --ink-3: #6f6982;
+      --bg: #f3f1f8;
+      --surface: #ffffff;
+      --line: #e7e2f1;
+      --brand: #6d28d9;
+      --brand-deep: #4c1d95;
+      --brand-2: #a855f7;
+      --accent: #0e7490;
+      --ok: #059669;
+      --ok-bg: #e8f7f0;
+      --bad: #e11d48;
+      --bad-bg: #fdeaef;
+      --warn: #d97706;
+      --side-1: #1c1530;
+      --side-2: #2a1b4d;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(21, 16, 31, 0.08);
+      --shadow-lg: 0 24px 60px rgba(21, 16, 31, 0.18);
     }
     * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-family: 'Manrope', sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
     }
-    header {
-      padding: 24px 32px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: baseline;
-      gap: 16px;
+    h1, h2, h3, .num { font-family: 'Sora', sans-serif; }
+
+    .app { display: grid; grid-template-columns: 264px 1fr; min-height: 100vh; }
+
+    /* ---------- Sidebar ---------- */
+    .sidebar {
+      position: sticky; top: 0; height: 100vh;
+      background: radial-gradient(120% 80% at 20% 0%, #3a2470 0%, var(--side-2) 40%, var(--side-1) 100%);
+      color: #ece8f7; padding: 26px 20px; display: flex; flex-direction: column;
+      border-right: 1px solid rgba(255,255,255,0.06);
     }
-    header h1 { margin: 0; font-size: 22px; }
-    header span { color: var(--muted); font-size: 14px; }
-    main { padding: 24px 32px; max-width: 1100px; margin: 0 auto; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
-    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
-    .card .value { font-size: 30px; font-weight: 700; }
-    .card .label { color: var(--muted); font-size: 13px; margin-top: 4px; }
-    table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 12px; overflow: hidden; }
-    th, td { padding: 12px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid var(--border); }
-    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
-    tbody tr { cursor: pointer; transition: background 0.15s; }
-    tbody tr:hover { background: var(--panel2); }
-    .bar { height: 8px; border-radius: 4px; background: var(--border); position: relative; width: 120px; }
-    .bar > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--accent); }
-    .muted { color: var(--muted); }
-    .detail { margin-top: 28px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 22px; display: none; }
-    .detail.open { display: block; }
-    .detail h2 { margin: 0 0 4px; font-size: 18px; }
-    .detail h3 { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin: 22px 0 10px; }
-    .skill-row { display: flex; align-items: center; gap: 14px; padding: 6px 0; }
-    .skill-row .name { width: 200px; }
-    .skill-row .pct { width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
-    .attempt { display: flex; gap: 12px; align-items: center; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
-    .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-    .dot.ok { background: var(--ok); }
-    .dot.bad { background: var(--bad); }
-    .close { float: right; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-    .empty { color: var(--muted); padding: 40px; text-align: center; }
-    .btn-ai { background: linear-gradient(135deg, #6d28d9, #4c1d95); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 14px rgba(109,40,217,0.3); }
-    .btn-ai:hover { box-shadow: 0 6px 20px rgba(109,40,217,0.45); }
-    .btn-ai:disabled { opacity: 0.6; cursor: progress; }
-    .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
-    .ai-box { margin-top: 16px; background: #faf8ff; border: 1px solid #e6def9; border-radius: 12px; padding: 18px 22px; line-height: 1.6; }
-    .ai-box h1, .ai-box h2, .ai-box h3 { color: #4c1d95; margin: 10px 0 6px; font-size: 15px; }
-    .ai-box ul { margin: 6px 0; padding-left: 20px; }
-    .ai-box strong { color: #1f1b2e; }
-    .ai-tag { display: inline-block; font-size: 11px; font-weight: 700; color: #6d28d9; background: #ede9fe; border-radius: 6px; padding: 2px 8px; margin-bottom: 8px; letter-spacing: 0.03em; }
-    .gen-form { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
-    .gen-form input, .gen-form select { border: 1px solid #e0dcec; border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit; }
-    .gen-form input#genTopic { flex: 1; min-width: 200px; }
-    .gen-form input#genCount { width: 70px; }
-    .gen-problem { background: #fff; border: 1px solid #e6def9; border-radius: 10px; padding: 14px 16px; margin-top: 10px; }
-    .gen-problem .q { font-weight: 600; color: #1f1b2e; margin: 6px 0; }
-    .gen-problem .skill { font-size: 12px; color: #6d28d9; }
-    .gen-choice { padding: 4px 10px; margin: 3px 0; border-radius: 6px; font-size: 14px; }
-    .gen-choice.correct { background: #ecfdf5; color: #065f46; font-weight: 600; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 34px; }
+    .brand .mark {
+      width: 42px; height: 42px; border-radius: 12px; flex: none;
+      background: linear-gradient(135deg, #8b5cf6, #4c1d95);
+      display: grid; place-items: center; font-family: 'Sora'; font-weight: 800; font-size: 20px; color: #fff;
+      box-shadow: 0 8px 20px rgba(139,92,246,0.45);
+    }
+    .brand .name { font-family: 'Sora'; font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
+    .brand .sub { font-size: 12px; color: #b3a9d6; margin-top: 1px; }
+    .nav { display: flex; flex-direction: column; gap: 4px; }
+    .nav button {
+      display: flex; align-items: center; gap: 12px; width: 100%;
+      background: transparent; border: none; color: #c5bce4; cursor: pointer;
+      font-family: 'Manrope'; font-size: 14.5px; font-weight: 600; text-align: left;
+      padding: 11px 14px; border-radius: 11px; transition: all .18s ease;
+    }
+    .nav button .ic { width: 18px; height: 18px; opacity: .9; }
+    .nav button:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .nav button.active { background: linear-gradient(100deg, rgba(139,92,246,0.30), rgba(139,92,246,0.10)); color: #fff; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.35); }
+    .side-foot { margin-top: auto; font-size: 12px; color: #8f86b3; line-height: 1.6; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .side-foot a { color: #b9aee2; text-decoration: none; }
+
+    /* ---------- Content ---------- */
+    .content { padding: 30px 38px 60px; max-width: 1180px; }
+    .topbar { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 26px; }
+    .topbar h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+    .topbar p { margin: 4px 0 0; color: var(--ink-2); font-size: 14.5px; }
+    .btn {
+      font-family: 'Manrope'; font-weight: 700; font-size: 14px; cursor: pointer;
+      border-radius: 11px; padding: 11px 18px; border: 1px solid transparent; transition: all .18s ease;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); color: #fff; box-shadow: 0 8px 20px rgba(109,40,217,0.28); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(109,40,217,0.40); }
+    .btn-primary:disabled { opacity: .6; cursor: progress; transform: none; }
+    .btn-ghost { background: var(--surface); color: var(--brand-deep); border-color: var(--line); }
+    .btn-ghost:hover { border-color: var(--brand-2); }
+
+    .view { display: none; animation: rise .4s ease both; }
+    .view.active { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* KPIs */
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 26px; }
+    .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+    .kpi::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); }
+    .kpi .label { font-size: 12.5px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+    .kpi .num { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; margin-top: 8px; color: var(--ink); }
+    .kpi .foot { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .panel-head { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+    .panel-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+    .panel-head .hint { font-size: 13px; color: var(--ink-3); }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th { text-align: left; font-size: 11.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; padding: 13px 22px; background: #faf9fd; border-bottom: 1px solid var(--line); }
+    tbody td { padding: 15px 22px; border-bottom: 1px solid #f1eef8; font-size: 14.5px; color: var(--ink); }
+    tbody tr { cursor: pointer; transition: background .15s ease; }
+    tbody tr:hover { background: #faf8ff; }
+    tbody tr:last-child td { border-bottom: none; }
+    .who { display: flex; align-items: center; gap: 11px; }
+    .avatar { width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center; font-family: 'Sora'; font-weight: 700; font-size: 14px; color: #fff; }
+    .who .nm { font-weight: 600; }
+    .who .badge { font-size: 10.5px; font-weight: 700; color: var(--brand-deep); background: #efe9fc; padding: 1px 7px; border-radius: 999px; letter-spacing: .03em; }
+    .num-cell { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+    .bar { height: 8px; width: 130px; border-radius: 99px; background: #ece8f5; overflow: hidden; }
+    .bar > span { display: block; height: 100%; border-radius: 99px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+    .pill.ok { background: var(--ok-bg); color: var(--ok); }
+    .pill.warn { background: #fdf3e7; color: var(--warn); }
+    .pill.bad { background: var(--bad-bg); color: var(--bad); }
+    .muted { color: var(--ink-3); }
+    .empty { padding: 50px; text-align: center; color: var(--ink-3); }
+
+    /* AI blocks */
+    .ai-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+    .ai-tag { display: inline-flex; align-items: center; gap: 7px; font-family: 'Sora'; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--brand-deep); background: linear-gradient(100deg, #efe9fc, #f7effe); padding: 5px 11px; border-radius: 999px; margin-bottom: 14px; }
+    .ai-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 0 3px rgba(168,85,247,.25); }
+    .ai-body { line-height: 1.7; color: var(--ink); font-size: 14.5px; }
+    .ai-body h1, .ai-body h2, .ai-body h3 { color: var(--brand-deep); font-size: 15px; margin: 14px 0 6px; }
+    .ai-body ul { margin: 6px 0; padding-left: 20px; }
+    .ai-body li { margin: 3px 0; }
+    .ai-body strong { color: var(--ink); font-weight: 700; }
+    .ai-body p { margin: 7px 0; }
+
+    /* Generator */
+    .gen-form { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 18px; }
+    .gen-form input, .gen-form select { font-family: 'Manrope'; font-size: 14px; border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; color: var(--ink); background: #fbfaff; outline: none; transition: border .15s; }
+    .gen-form input:focus, .gen-form select:focus { border-color: var(--brand-2); }
+    .gen-form #genTopic { flex: 1; min-width: 240px; }
+    .gen-form #genCount { width: 84px; }
+    .gen-problem { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-top: 14px; background: #fcfbff; }
+    .gen-problem .skill { font-size: 12px; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .04em; }
+    .gen-problem .ttl { font-family: 'Sora'; font-weight: 700; font-size: 16px; margin: 6px 0 2px; }
+    .gen-problem .q { font-weight: 600; margin: 10px 0 8px; color: var(--ink); }
+    .gen-choice { padding: 8px 13px; margin: 6px 0; border-radius: 9px; font-size: 14px; border: 1px solid var(--line); background: #fff; }
+    .gen-choice.correct { background: var(--ok-bg); border-color: #b7ebd4; color: #044e3b; font-weight: 700; }
+
+    /* Drawer */
+    .overlay { position: fixed; inset: 0; background: rgba(21,16,31,.45); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 40; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 480px; max-width: 92vw; background: var(--bg); box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); z-index: 50; overflow-y: auto; }
+    .drawer.open { transform: none; }
+    .drawer-head { padding: 26px 26px 20px; background: linear-gradient(140deg, var(--side-2), var(--side-1)); color: #fff; position: relative; }
+    .drawer-head .close { position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,.14); color: #fff; font-size: 18px; cursor: pointer; }
+    .drawer-head .close:hover { background: rgba(255,255,255,.25); }
+    .drawer-head h2 { margin: 0; font-size: 20px; word-break: break-word; }
+    .drawer-chips { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .chip { background: rgba(255,255,255,.12); border-radius: 11px; padding: 9px 13px; }
+    .chip .v { font-family: 'Sora'; font-weight: 700; font-size: 18px; }
+    .chip .l { font-size: 11px; color: #cfc6ea; text-transform: uppercase; letter-spacing: .04em; }
+    .drawer-body { padding: 22px 26px 40px; }
+    .sec-title { font-family: 'Sora'; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin: 22px 0 12px; }
+    .skill-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #ece8f5; }
+    .skill-row .nm { flex: 1; font-weight: 600; font-size: 14px; }
+    .skill-row .pct { width: 44px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+    .timeline { display: flex; flex-direction: column; }
+    .tl { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid #ece8f5; font-size: 14px; }
+    .tl .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+    .tl .dot.ok { background: var(--ok); } .tl .dot.bad { background: var(--bad); }
+    .tl .when { margin-left: auto; font-size: 12.5px; color: var(--ink-3); }
+    @media (max-width: 880px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; flex-direction: row; align-items: center; gap: 18px; overflow-x: auto; }
+      .nav { flex-direction: row; }
+      .side-foot { display: none; } .brand { margin: 0; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .content { padding: 22px; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>SócratIA</h1>
-    <span>Panel del docente · progreso de los alumnos</span>
-  </header>
-  <main>
-    <div class="cards" id="cards"></div>
-    <div class="toolbar">
-      <button class="btn-ai" id="genBtn">Generar ejercicios con IA</button>
-      <button class="btn-ai" id="reportBtn">Generar reporte del grupo con IA</button>
-    </div>
-    <div class="ai-box" id="genBox" style="display:none">
-      <span class="ai-tag">SÓCRATIA · GENERADOR</span>
-      <div class="gen-form">
-        <input id="genTopic" placeholder="Tema (ej. ecuaciones lineales)" />
-        <input id="genLevel" placeholder="Nivel (ej. secundaria)" value="secundaria" />
-        <input id="genCount" type="number" min="1" max="6" value="3" title="Cantidad" />
-        <select id="genLang">
-          <option value="es">Español</option>
-          <option value="en">English</option>
-          <option value="pt">Português</option>
-          <option value="quechua">Runa Simi (Quechua)</option>
-        </select>
-        <button class="btn-ai" id="genRun">Generar</button>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark">S</div>
+        <div>
+          <div class="name">SócratIA</div>
+          <div class="sub">Panel docente</div>
+        </div>
       </div>
-      <div id="genResult"></div>
-    </div>
-    <div class="ai-box" id="reportBox" style="display:none"></div>
-    <table>
-      <thead>
-        <tr>
-          <th>Alumno</th>
-          <th>Intentos</th>
-          <th>Aciertos</th>
-          <th>% Acierto</th>
-          <th>Dominio promedio</th>
-          <th>Última actividad</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
-    <div class="detail" id="detail"></div>
-  </main>
+      <nav class="nav" id="nav">
+        <button data-view="resumen" class="active"><span class="ic">▤</span> Resumen</button>
+        <button data-view="alumnos"><span class="ic">☰</span> Alumnos</button>
+        <button data-view="reporte"><span class="ic">✦</span> Reporte del grupo</button>
+        <button data-view="generador"><span class="ic">＋</span> Generar ejercicios</button>
+      </nav>
+      <div class="side-foot">
+        Tutoría inteligente adaptativa<br>
+        <a href="https://cms.net.pe" target="_blank">cms.net.pe</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div>
+          <h1 id="pageTitle">Resumen</h1>
+          <p id="pageSub">Vista general del progreso del grupo</p>
+        </div>
+        <button class="btn btn-ghost" id="refreshBtn">↻ Actualizar</button>
+      </div>
+
+      <!-- RESUMEN -->
+      <section class="view active" id="view-resumen">
+        <div class="kpis" id="kpis"></div>
+        <div class="panel">
+          <div class="panel-head"><h2>Alumnos en riesgo</h2><span class="hint">dominio &lt; 40% o sin actividad</span></div>
+          <div id="riskList"></div>
+        </div>
+      </section>
+
+      <!-- ALUMNOS -->
+      <section class="view" id="view-alumnos">
+        <div class="panel">
+          <div class="panel-head"><h2>Alumnos</h2><span class="hint">clic en un alumno para ver el detalle</span></div>
+          <table>
+            <thead><tr>
+              <th>Alumno</th><th>Intentos</th><th>Aciertos</th><th>% Acierto</th><th>Dominio</th><th>Última actividad</th>
+            </tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- REPORTE -->
+      <section class="view" id="view-reporte">
+        <div class="ai-card">
+          <span class="ai-tag"><span class="dot"></span> SÓCRATIA · IA</span>
+          <h2 style="margin:0 0 6px; font-size:18px;">Informe pedagógico del grupo</h2>
+          <p class="muted" style="margin:0 0 16px; font-size:14px;">Análisis automático del desempeño general, alumnos en riesgo y recomendaciones.</p>
+          <button class="btn btn-primary" id="reportBtn">Generar informe con IA</button>
+          <div class="ai-body" id="reportBox" style="margin-top:18px;"></div>
+        </div>
+      </section>
+
+      <!-- GENERADOR -->
+      <section class="view" id="view-generador">
+        <div class="ai-card">
+          <span class="ai-tag"><span class="dot"></span> SÓCRATIA · GENERADOR</span>
+          <h2 style="margin:0 0 6px; font-size:18px;">Generador de ejercicios</h2>
+          <p class="muted" style="margin:0 0 16px; font-size:14px;">Crea ejercicios de opción múltiple con IA sobre cualquier tema y nivel.</p>
+          <div class="gen-form">
+            <input id="genTopic" placeholder="Tema — ej. ecuaciones lineales" />
+            <input id="genLevel" placeholder="Nivel" value="secundaria" />
+            <input id="genCount" type="number" min="1" max="6" value="3" title="Cantidad" />
+            <select id="genLang">
+              <option value="es">Español</option>
+              <option value="en">English</option>
+              <option value="pt">Português</option>
+              <option value="quechua">Runa Simi (Quechua)</option>
+            </select>
+            <button class="btn btn-primary" id="genRun">Generar</button>
+          </div>
+          <div id="genResult"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer"></aside>
 
   <script type="module">
     const API = "/ai";
+    let STUDENTS = [];
 
-    function renderMarkdown(md) {
-      const lines = md.split("\n");
-      let html = "";
-      let inList = false;
-      for (let line of lines) {
-        line = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-        const bullet = line.match(/^\s*[-*]\s+(.*)/);
-        if (bullet) {
-          if (!inList) { html += "<ul>"; inList = true; }
-          html += `<li>${bullet[1]}</li>`;
-          continue;
-        }
-        if (inList) { html += "</ul>"; inList = false; }
-        const h = line.match(/^(#{1,3})\s+(.*)/);
-        if (h) { const n = h[1].length; html += `<h${n}>${h[2]}</h${n}>`; }
-        else if (line.trim() === "") { html += ""; }
-        else { html += `<p style="margin:6px 0">${line}</p>`; }
+    const AV = ["#6d28d9","#0e7490","#be185d","#047857","#b45309","#4338ca","#0891b2","#9333ea"];
+    function avatarColor(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))%AV.length; return AV[h]; }
+    function displayName(s){ return s.name && !s.name.includes("@") ? s.name : (s.externalId.startsWith("canvas:") ? "Alumno de Canvas" : s.externalId); }
+    function initial(s){ return (displayName(s)[0]||"?").toUpperCase(); }
+    function isCanvas(s){ return s.externalId.startsWith("canvas:"); }
+    function pct(p,t){ return t? Math.round(p/t*100):0; }
+    function masteryColor(v){ if(v>=0.7) return "var(--ok)"; if(v<0.4) return "var(--bad)"; return "var(--brand)"; }
+    function bar(v){ const w=Math.round((v??0)*100); return `<div class="bar"><span style="width:${w}%;background:${masteryColor(v??0)}"></span></div>`; }
+    function fmtDate(iso){ if(!iso) return "—"; return new Date(iso).toLocaleString("es-PE",{dateStyle:"short",timeStyle:"short"}); }
+    function accuracyPill(p,t){ const v=pct(p,t); const cls=v>=70?"ok":v>=40?"warn":"bad"; return `<span class="pill ${cls}">${v}%</span>`; }
+
+    function renderMarkdown(md){
+      const lines=(md||"").split("\n"); let html=""; let inList=false;
+      for(let line of lines){
+        line=line.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+        const b=line.match(/^\s*[-*]\s+(.*)/);
+        if(b){ if(!inList){html+="<ul>";inList=true;} html+=`<li>${b[1]}</li>`; continue; }
+        if(inList){ html+="</ul>"; inList=false; }
+        const h=line.match(/^(#{1,3})\s+(.*)/);
+        if(h){ html+=`<h3>${h[2]}</h3>`; }
+        else if(line.trim()===""){ }
+        else { html+=`<p>${line}</p>`; }
       }
-      if (inList) html += "</ul>";
+      if(inList) html+="</ul>";
       return html;
     }
 
-    function pct(part, total) {
-      if (!total) return 0;
-      return Math.round((part / total) * 100);
+    function renderKpis(s){
+      const total=s.length;
+      const attempts=s.reduce((a,x)=>a+x.attemptsTotal,0);
+      const correct=s.reduce((a,x)=>a+x.correctTotal,0);
+      const masteries=s.map(x=>x.avgMastery).filter(v=>v!=null);
+      const avg=masteries.length? Math.round(masteries.reduce((a,v)=>a+v,0)/masteries.length*100):0;
+      document.getElementById("kpis").innerHTML=`
+        ${kpi(total,"Alumnos","activos en la plataforma")}
+        ${kpi(attempts,"Intentos","ejercicios respondidos")}
+        ${kpi(pct(correct,attempts)+"%","Acierto global","del total de intentos")}
+        ${kpi(avg+"%","Dominio promedio","across habilidades")}`;
+    }
+    function kpi(n,l,f){ return `<div class="kpi"><div class="label">${l}</div><div class="num">${n}</div><div class="foot">${f}</div></div>`; }
+
+    function rowHtml(s){
+      return `<tr data-id="${encodeURIComponent(s.externalId)}">
+        <td><div class="who">
+          <div class="avatar" style="background:${avatarColor(s.externalId)}">${initial(s)}</div>
+          <div><div class="nm">${displayName(s)}</div>${isCanvas(s)?'<span class="badge">CANVAS</span>':''}</div>
+        </div></td>
+        <td class="num-cell">${s.attemptsTotal}</td>
+        <td class="num-cell">${s.correctTotal}</td>
+        <td>${accuracyPill(s.correctTotal,s.attemptsTotal)}</td>
+        <td><div style="display:flex;align-items:center;gap:10px">${bar(s.avgMastery)}<span class="num-cell" style="font-size:13px">${s.avgMastery==null?"—":Math.round(s.avgMastery*100)+"%"}</span></div></td>
+        <td class="muted" style="font-size:13px">${fmtDate(s.lastActivity)}</td>
+      </tr>`;
     }
 
-    function masteryColor(value) {
-      if (value >= 0.7) return "var(--ok)";
-      if (value < 0.4) return "var(--bad)";
-      return "var(--accent)";
+    function renderRows(s){
+      const tb=document.getElementById("rows");
+      tb.innerHTML = s.length? s.map(rowHtml).join("") : `<tr><td colspan="6" class="empty">Aún no hay actividad de alumnos.</td></tr>`;
+      tb.querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click",()=>openDrawer(tr.getAttribute("data-id"))));
     }
 
-    function bar(value) {
-      const width = Math.round((value ?? 0) * 100);
-      const color = masteryColor(value ?? 0);
-      return `<div class="bar"><span style="width:${width}%;background:${color}"></span></div>`;
+    function renderRisk(s){
+      const risk=s.filter(x=> (x.avgMastery!=null && x.avgMastery<0.4) || x.attemptsTotal===0)
+                  .sort((a,b)=>(a.avgMastery??0)-(b.avgMastery??0));
+      const el=document.getElementById("riskList");
+      if(!risk.length){ el.innerHTML=`<div class="empty">Ningún alumno en riesgo. 🎉</div>`; return; }
+      el.innerHTML=`<table><tbody>${risk.map(rowHtml).join("")}</tbody></table>`;
+      el.querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click",()=>openDrawer(tr.getAttribute("data-id"))));
     }
 
-    function fmtDate(iso) {
-      if (!iso) return "—";
-      return new Date(iso).toLocaleString("es-PE", { dateStyle: "short", timeStyle: "short" });
-    }
-
-    function renderCards(students) {
-      const total = students.length;
-      const attempts = students.reduce((a, s) => a + s.attemptsTotal, 0);
-      const correct = students.reduce((a, s) => a + s.correctTotal, 0);
-      document.getElementById("cards").innerHTML = `
-        <div class="card"><div class="value">${total}</div><div class="label">Alumnos</div></div>
-        <div class="card"><div class="value">${attempts}</div><div class="label">Intentos totales</div></div>
-        <div class="card"><div class="value">${pct(correct, attempts)}%</div><div class="label">Acierto global</div></div>`;
-    }
-
-    function renderRows(students) {
-      const tbody = document.getElementById("rows");
-      if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty">Aún no hay actividad de alumnos.</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = students.map((s) => `
-        <tr data-id="${encodeURIComponent(s.externalId)}">
-          <td>${s.externalId}</td>
-          <td>${s.attemptsTotal}</td>
-          <td>${s.correctTotal}</td>
-          <td>${pct(s.correctTotal, s.attemptsTotal)}%</td>
-          <td>${bar(s.avgMastery)}</td>
-          <td class="muted">${fmtDate(s.lastActivity)}</td>
-        </tr>`).join("");
-      for (const tr of tbody.querySelectorAll("tr[data-id]")) {
-        tr.addEventListener("click", () => openDetail(tr.getAttribute("data-id")));
-      }
-    }
-
-    async function openDetail(id) {
-      const res = await fetch(`${API}/progress/${id}`);
-      const data = await res.json();
-      const detail = document.getElementById("detail");
-      const skills = data.mastery.map((m) => `
-        <div class="skill-row">
-          <div class="name">${m.skill}</div>
-          ${bar(m.mastery)}
-          <div class="pct">${Math.round(m.mastery * 100)}%</div>
-          <div class="muted">${m.attempts} intento(s)</div>
-        </div>`).join("") || `<div class="muted">Sin habilidades registradas.</div>`;
-      const recent = data.recent.map((a) => `
-        <div class="attempt">
-          <span class="dot ${a.correct ? "ok" : "bad"}"></span>
-          <span>${a.skill ?? "—"}</span>
-          <span class="muted">${a.problemId ?? ""}</span>
-          <span class="muted" style="margin-left:auto">${fmtDate(a.createdAt)}</span>
-        </div>`).join("") || `<div class="muted">Sin intentos.</div>`;
-      detail.innerHTML = `
-        <button class="close" id="closeDetail">Cerrar</button>
-        <h2>${decodeURIComponent(id)}</h2>
-        <div class="muted">${data.attemptsTotal} intentos · ${data.correctTotal} aciertos · ${pct(data.correctTotal, data.attemptsTotal)}% de acierto</div>
-        <h3>Dominio por habilidad</h3>
-        ${skills}
-        <h3>Actividad reciente</h3>
-        ${recent}
-        <h3>Diagnóstico con IA</h3>
-        <button class="btn-ai" id="diagnoseBtn">Generar diagnóstico de este alumno</button>
-        <div class="ai-box" id="diagnoseBox" style="display:none"></div>`;
-      detail.classList.add("open");
-      document.getElementById("closeDetail").addEventListener("click", () => detail.classList.remove("open"));
-      document.getElementById("diagnoseBtn").addEventListener("click", async (e) => {
-        const btn = e.target;
-        const box = document.getElementById("diagnoseBox");
-        btn.disabled = true;
-        btn.textContent = "Analizando…";
-        box.style.display = "block";
-        box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span><div class="muted">Generando diagnóstico…</div>';
-        try {
-          const r = await fetch(`${API}/diagnose/${encodeURIComponent(id)}`);
-          const d = await r.json();
-          box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span>' + renderMarkdown(d.diagnosis || "Sin datos suficientes.");
-        } catch (err) {
-          box.innerHTML = `<div class="muted">Error: ${err.message}</div>`;
-        }
-        btn.textContent = "Regenerar diagnóstico";
-        btn.disabled = false;
+    async function openDrawer(id){
+      const drawer=document.getElementById("drawer");
+      const overlay=document.getElementById("overlay");
+      drawer.innerHTML=`<div class="drawer-head"><button class="close">×</button><h2>Cargando…</h2></div>`;
+      drawer.classList.add("open"); overlay.classList.add("open");
+      drawer.querySelector(".close").addEventListener("click",closeDrawer);
+      const data=await (await fetch(`${API}/progress/${id}`)).json();
+      const s=STUDENTS.find(x=>encodeURIComponent(x.externalId)===id) || {externalId:decodeURIComponent(id)};
+      const skills=data.mastery.map(m=>`<div class="skill-row"><div class="nm">${m.skill}</div>${bar(m.mastery)}<div class="pct" style="color:${masteryColor(m.mastery)}">${Math.round(m.mastery*100)}%</div></div>`).join("")||`<div class="muted">Sin habilidades registradas.</div>`;
+      const recent=data.recent.map(a=>`<div class="tl"><span class="dot ${a.correct?"ok":"bad"}"></span><span>${a.skill??"—"}</span><span class="muted" style="font-size:12px">${a.problemId??""}</span><span class="when">${fmtDate(a.createdAt)}</span></div>`).join("")||`<div class="muted">Sin intentos.</div>`;
+      drawer.innerHTML=`
+        <div class="drawer-head">
+          <button class="close">×</button>
+          <h2>${displayName(s)}</h2>
+          <div class="muted" style="color:#cfc6ea;font-size:13px;margin-top:4px">${s.externalId}</div>
+          <div class="drawer-chips">
+            <div class="chip"><div class="v">${data.attemptsTotal}</div><div class="l">Intentos</div></div>
+            <div class="chip"><div class="v">${data.correctTotal}</div><div class="l">Aciertos</div></div>
+            <div class="chip"><div class="v">${pct(data.correctTotal,data.attemptsTotal)}%</div><div class="l">Acierto</div></div>
+          </div>
+        </div>
+        <div class="drawer-body">
+          <div class="sec-title">Dominio por habilidad</div>${skills}
+          <div class="sec-title">Actividad reciente</div><div class="timeline">${recent}</div>
+          <div class="sec-title">Diagnóstico con IA</div>
+          <button class="btn btn-primary" id="diagBtn" style="width:100%">Generar diagnóstico de este alumno</button>
+          <div class="ai-body" id="diagBox" style="margin-top:14px"></div>
+        </div>`;
+      drawer.querySelector(".close").addEventListener("click",closeDrawer);
+      drawer.querySelector("#diagBtn").addEventListener("click",async(e)=>{
+        const btn=e.target, box=document.getElementById("diagBox");
+        btn.disabled=true; btn.textContent="Analizando…";
+        box.innerHTML='<span class="ai-tag"><span class="dot"></span> SÓCRATIA · IA</span><div class="muted">Generando diagnóstico…</div>';
+        try{ const d=await (await fetch(`${API}/diagnose/${id}`)).json();
+          box.innerHTML='<span class="ai-tag"><span class="dot"></span> SÓCRATIA · IA</span>'+renderMarkdown(d.diagnosis||"Sin datos suficientes."); }
+        catch(err){ box.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
+        btn.disabled=false; btn.textContent="Regenerar diagnóstico";
       });
-      detail.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    function closeDrawer(){ document.getElementById("drawer").classList.remove("open"); document.getElementById("overlay").classList.remove("open"); }
+    document.getElementById("overlay").addEventListener("click",closeDrawer);
 
-    document.getElementById("genBtn").addEventListener("click", () => {
-      const box = document.getElementById("genBox");
-      box.style.display = box.style.display === "none" ? "block" : "none";
+    // nav
+    const titles={resumen:["Resumen","Vista general del progreso del grupo"],alumnos:["Alumnos","Detalle individual y diagnóstico"],reporte:["Reporte del grupo","Informe pedagógico generado con IA"],generador:["Generar ejercicios","Crea contenido nuevo con IA"]};
+    document.getElementById("nav").addEventListener("click",(e)=>{
+      const b=e.target.closest("button[data-view]"); if(!b) return;
+      const v=b.dataset.view;
+      document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x===b));
+      document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.id==="view-"+v));
+      document.getElementById("pageTitle").textContent=titles[v][0];
+      document.getElementById("pageSub").textContent=titles[v][1];
     });
 
-    document.getElementById("genRun").addEventListener("click", async (e) => {
-      const btn = e.target;
-      const topic = document.getElementById("genTopic").value.trim();
-      const result = document.getElementById("genResult");
-      if (!topic) { result.innerHTML = '<div class="muted">Escribe un tema.</div>'; return; }
-      btn.disabled = true; btn.textContent = "Generando…";
-      result.innerHTML = '<div class="muted">Creando ejercicios con IA…</div>';
-      try {
-        const r = await fetch(`${API}/generate-problem`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            topic,
-            level: document.getElementById("genLevel").value.trim() || "básico",
-            language: document.getElementById("genLang").value,
-            count: Number(document.getElementById("genCount").value) || 3,
-          }),
-        });
-        const d = await r.json();
-        const probs = Array.isArray(d.problems) ? d.problems : [];
-        result.innerHTML = `<h3>Lección: ${d.lesson || topic}</h3>` + probs.map((p) => `
+    // report
+    document.getElementById("reportBtn").addEventListener("click",async(e)=>{
+      const btn=e.target, box=document.getElementById("reportBox");
+      btn.disabled=true; btn.textContent="Analizando el grupo…";
+      box.innerHTML='<div class="muted">Generando informe…</div>';
+      try{ const d=await (await fetch(`${API}/class-report`)).json(); box.innerHTML=renderMarkdown(d.report||"Sin datos."); }
+      catch(err){ box.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
+      btn.disabled=false; btn.textContent="Regenerar informe";
+    });
+
+    // generator
+    document.getElementById("genRun").addEventListener("click",async(e)=>{
+      const btn=e.target, topic=document.getElementById("genTopic").value.trim(), result=document.getElementById("genResult");
+      if(!topic){ result.innerHTML='<div class="muted">Escribe un tema.</div>'; return; }
+      btn.disabled=true; btn.textContent="Generando…";
+      result.innerHTML='<div class="muted" style="margin-top:14px">Creando ejercicios con IA…</div>';
+      try{
+        const d=await (await fetch(`${API}/generate-problem`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,level:document.getElementById("genLevel").value.trim()||"básico",language:document.getElementById("genLang").value,count:Number(document.getElementById("genCount").value)||3})})).json();
+        const probs=Array.isArray(d.problems)?d.problems:[];
+        result.innerHTML=`<div class="sec-title" style="margin-top:18px">Lección: ${d.lesson||topic}</div>`+probs.map(p=>`
           <div class="gen-problem">
-            <div class="skill">${p.skill || ""}</div>
-            <div><strong>${p.title || ""}</strong></div>
-            <div>${p.body || ""}</div>
-            <div class="q">${p.stepTitle || ""}</div>
-            ${(p.choices || []).map((c) => `<div class="gen-choice ${c === p.answer ? "correct" : ""}">${c}${c === p.answer ? "  ✓" : ""}</div>`).join("")}
-          </div>`).join("") || '<div class="muted">No se generaron ejercicios.</div>';
-      } catch (err) {
-        result.innerHTML = `<div class="muted">Error: ${err.message}</div>`;
-      }
-      btn.disabled = false; btn.textContent = "Generar";
+            <div class="skill">${p.skill||""}</div>
+            <div class="ttl">${p.title||""}</div>
+            <div class="muted" style="font-size:14px">${p.body||""}</div>
+            <div class="q">${p.stepTitle||""}</div>
+            ${(p.choices||[]).map(c=>`<div class="gen-choice ${c===p.answer?"correct":""}">${c}${c===p.answer?"  ✓":""}</div>`).join("")}
+          </div>`).join("")||'<div class="muted">No se generaron ejercicios.</div>';
+      }catch(err){ result.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
+      btn.disabled=false; btn.textContent="Generar";
     });
 
-    document.getElementById("reportBtn").addEventListener("click", async (e) => {
-      const btn = e.target;
-      const box = document.getElementById("reportBox");
-      btn.disabled = true;
-      btn.textContent = "Analizando el grupo…";
-      box.style.display = "block";
-      box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span><div class="muted">Generando reporte…</div>';
-      try {
-        const r = await fetch(`${API}/class-report`);
-        const d = await r.json();
-        box.innerHTML = '<span class="ai-tag">SÓCRATIA · IA</span>' + renderMarkdown(d.report || "Sin datos.");
-      } catch (err) {
-        box.innerHTML = `<div class="muted">Error: ${err.message}</div>`;
+    async function load(){
+      try{
+        STUDENTS=await (await fetch(`${API}/students`)).json();
+        renderKpis(STUDENTS); renderRows(STUDENTS); renderRisk(STUDENTS);
+      }catch(err){
+        document.getElementById("rows").innerHTML=`<tr><td colspan="6" class="empty">Error cargando datos: ${err.message}</td></tr>`;
       }
-      btn.textContent = "Regenerar reporte del grupo";
-      btn.disabled = false;
-    });
-
-    async function load() {
-      const res = await fetch(`${API}/students`);
-      const students = await res.json();
-      renderCards(students);
-      renderRows(students);
     }
-
-    load().catch((error) => {
-      document.getElementById("rows").innerHTML =
-        `<tr><td colspan="6" class="empty">Error cargando datos: ${error.message}</td></tr>`;
-    });
+    document.getElementById("refreshBtn").addEventListener("click",load);
+    load();
   </script>
 </body>
 </html>
