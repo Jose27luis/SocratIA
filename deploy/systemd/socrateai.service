@@ -1,0 +1,13 @@
+[Unit]
+Description=SocrateAI - backend de tutoria (Node + TypeScript + Claude)
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/SocratIA/backend
+ExecStart=/usr/bin/node dist/server.js
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
