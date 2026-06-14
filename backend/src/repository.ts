@@ -143,6 +143,49 @@ export async function getProgress(externalId: string): Promise<StudentProgress> 
   };
 }
 
+export async function getCachedTranslations(
+  hashes: readonly string[],
+  target: string,
+): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+  if (hashes.length === 0) {
+    return result;
+  }
+  const rows = await pool.query<{ source_hash: string; translated: string }>(
+    `SELECT source_hash, translated FROM translations
+     WHERE target_lang = $1 AND source_hash = ANY($2)`,
+    [target, hashes],
+  );
+  for (const row of rows.rows) {
+    result.set(row.source_hash, row.translated);
+  }
+  return result;
+}
+
+export async function saveTranslations(
+  entries: readonly { hash: string; translated: string }[],
+  target: string,
+): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (const entry of entries) {
+      await client.query(
+        `INSERT INTO translations (source_hash, target_lang, translated)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (source_hash, target_lang) DO UPDATE SET translated = EXCLUDED.translated`,
+        [entry.hash, target, entry.translated],
+      );
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 export async function listStudents(): Promise<StudentSummary[]> {
   const result = await pool.query<SummaryRow>(
     `SELECT s.external_id,

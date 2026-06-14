@@ -1,8 +1,15 @@
 import type { FastifyInstance } from "fastify";
 import { config } from "./config.js";
-import { ValidationError, parseAttempt, parseDynamicHint, parseHintRequest } from "./parse.js";
+import {
+  ValidationError,
+  parseAttempt,
+  parseDynamicHint,
+  parseHintRequest,
+  parseTranslate,
+} from "./parse.js";
 import { getProgress, listStudents, recordAttempt } from "./repository.js";
 import { generateHint, streamHintText } from "./tutor.js";
+import { translateTexts } from "./translate.js";
 
 interface StudentParams {
   readonly student: string;
@@ -47,4 +54,10 @@ export function registerRoutes(app: FastifyInstance): void {
   );
 
   app.get("/students", async () => listStudents());
+
+  app.post("/translate", async (request) => {
+    const { texts, target } = parseTranslate(request.body);
+    const translations = await translateTexts(texts, target);
+    return { translations };
+  });
 }

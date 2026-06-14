@@ -18,6 +18,11 @@ export interface DynamicHintRequest {
   readonly message: string;
 }
 
+export interface TranslateRequest {
+  readonly texts: readonly string[];
+  readonly target: string;
+}
+
 export interface AttemptRequest {
   readonly student: string;
   readonly problemId: string | null;

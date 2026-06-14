@@ -1,4 +1,9 @@
-import type { AttemptRequest, DynamicHintRequest, HintRequest } from "./types.js";
+import type {
+  AttemptRequest,
+  DynamicHintRequest,
+  HintRequest,
+  TranslateRequest,
+} from "./types.js";
 
 export class ValidationError extends Error {}
 
@@ -43,6 +48,19 @@ export function parseDynamicHint(body: unknown): DynamicHintRequest {
   return {
     role: typeof role === "string" ? role : "user",
     message: asString(obj["message"], "message"),
+  };
+}
+
+export function parseTranslate(body: unknown): TranslateRequest {
+  const obj = asObject(body);
+  const texts = obj["texts"];
+  if (!Array.isArray(texts)) {
+    throw new ValidationError("Campo invalido o ausente: texts");
+  }
+  const target = obj["target"];
+  return {
+    texts: texts.map((item) => (typeof item === "string" ? item : "")),
+    target: typeof target === "string" && target !== "" ? target : "es",
   };
 }
 

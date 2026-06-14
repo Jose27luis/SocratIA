@@ -27,3 +27,11 @@ CREATE TABLE IF NOT EXISTS skill_mastery (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (student_id, skill)
 );
+
+CREATE TABLE IF NOT EXISTS translations (
+    source_hash TEXT NOT NULL,
+    target_lang TEXT NOT NULL,
+    translated  TEXT NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (source_hash, target_lang)
+);
