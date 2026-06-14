@@ -1,7 +1,11 @@
 import type {
   AttemptRequest,
+  ChatBody,
   DynamicHintRequest,
+  GenerateBody,
   HintRequest,
+  MisconceptionBody,
+  ReinforcementBody,
   TranslateRequest,
 } from "./types.js";
 
@@ -61,6 +65,52 @@ export function parseTranslate(body: unknown): TranslateRequest {
   return {
     texts: texts.map((item) => (typeof item === "string" ? item : "")),
     target: typeof target === "string" && target !== "" ? target : "es",
+  };
+}
+
+export function parseReinforcement(body: unknown): ReinforcementBody {
+  const obj = asObject(body);
+  return {
+    problem: asString(obj["problem"], "problem"),
+    step: asString(obj["step"], "step"),
+    studentAnswer: asString(obj["student_answer"], "student_answer"),
+  };
+}
+
+export function parseMisconception(body: unknown): MisconceptionBody {
+  const obj = asObject(body);
+  return {
+    student: nullableString(obj["student"]),
+    skill: nullableString(obj["skill"]),
+    problem: asString(obj["problem"], "problem"),
+    step: asString(obj["step"], "step"),
+    correctAnswer: asString(obj["correct_answer"], "correct_answer"),
+    studentAnswer: asString(obj["student_answer"], "student_answer"),
+  };
+}
+
+export function parseChat(body: unknown): ChatBody {
+  const obj = asObject(body);
+  const history = obj["history"];
+  const turns = Array.isArray(history) ? history : [];
+  return {
+    context: typeof obj["context"] === "string" ? obj["context"] : "",
+    history: turns.map((turn) => {
+      const t = turn as Record<string, unknown>;
+      const role = t["role"] === "assistant" ? "assistant" : "user";
+      return { role, content: typeof t["content"] === "string" ? t["content"] : "" };
+    }),
+  };
+}
+
+export function parseGenerate(body: unknown): GenerateBody {
+  const obj = asObject(body);
+  const count = obj["count"];
+  return {
+    topic: asString(obj["topic"], "topic"),
+    level: typeof obj["level"] === "string" ? obj["level"] : "básico",
+    language: typeof obj["language"] === "string" ? obj["language"] : "es",
+    count: typeof count === "number" && count > 0 && count <= 10 ? Math.floor(count) : 3,
   };
 }
 

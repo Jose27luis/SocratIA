@@ -23,6 +23,33 @@ export interface TranslateRequest {
   readonly target: string;
 }
 
+export interface ReinforcementBody {
+  readonly problem: string;
+  readonly step: string;
+  readonly studentAnswer: string;
+}
+
+export interface MisconceptionBody {
+  readonly student: string | null;
+  readonly skill: string | null;
+  readonly problem: string;
+  readonly step: string;
+  readonly correctAnswer: string;
+  readonly studentAnswer: string;
+}
+
+export interface ChatBody {
+  readonly context: string;
+  readonly history: readonly { role: "user" | "assistant"; content: string }[];
+}
+
+export interface GenerateBody {
+  readonly topic: string;
+  readonly level: string;
+  readonly language: string;
+  readonly count: number;
+}
+
 export interface AttemptRequest {
   readonly student: string;
   readonly problemId: string | null;

@@ -143,6 +143,38 @@ export async function getProgress(externalId: string): Promise<StudentProgress> 
   };
 }
 
+export async function recordMisconception(
+  externalId: string,
+  skill: string | null,
+  category: string,
+  explanation: string,
+): Promise<void> {
+  await pool.query(
+    `INSERT INTO misconceptions (student_id, skill, category, explanation)
+     SELECT id, $2, $3, $4 FROM students WHERE external_id = $1`,
+    [externalId, skill, category, explanation],
+  );
+}
+
+export async function getMisconceptions(
+  externalId: string,
+): Promise<{ skill: string | null; category: string; explanation: string | null }[]> {
+  const result = await pool.query<{
+    skill: string | null;
+    category: string;
+    explanation: string | null;
+  }>(
+    `SELECT m.skill, m.category, m.explanation
+     FROM misconceptions m
+     JOIN students s ON s.id = m.student_id
+     WHERE s.external_id = $1
+     ORDER BY m.created_at DESC
+     LIMIT 30`,
+    [externalId],
+  );
+  return result.rows;
+}
+
 export async function getCachedTranslations(
   hashes: readonly string[],
   target: string,

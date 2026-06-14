@@ -3,13 +3,31 @@ import { config } from "./config.js";
 import {
   ValidationError,
   parseAttempt,
+  parseChat,
   parseDynamicHint,
+  parseGenerate,
   parseHintRequest,
+  parseMisconception,
+  parseReinforcement,
   parseTranslate,
 } from "./parse.js";
-import { getProgress, listStudents, recordAttempt } from "./repository.js";
+import {
+  getMisconceptions,
+  getProgress,
+  listStudents,
+  recordAttempt,
+  recordMisconception,
+} from "./repository.js";
 import { generateHint, streamHintText } from "./tutor.js";
 import { translateTexts } from "./translate.js";
+import {
+  chatTutorStream,
+  classReport,
+  classifyMisconception,
+  diagnoseStudent,
+  generateProblems,
+  generateReinforcement,
+} from "./features.js";
 
 interface StudentParams {
   readonly student: string;
@@ -59,5 +77,63 @@ export function registerRoutes(app: FastifyInstance): void {
     const { texts, target } = parseTranslate(request.body);
     const translations = await translateTexts(texts, target);
     return { translations };
+  });
+
+  app.post("/feedback", async (request) => {
+    const body = parseReinforcement(request.body);
+    const text = await generateReinforcement({
+      problem: body.problem,
+      step: body.step,
+      studentAnswer: body.studentAnswer,
+    });
+    return { feedback: text };
+  });
+
+  app.post("/misconception", async (request) => {
+    const body = parseMisconception(request.body);
+    const result = await classifyMisconception({
+      problem: body.problem,
+      step: body.step,
+      correctAnswer: body.correctAnswer,
+      studentAnswer: body.studentAnswer,
+    });
+    if (body.student !== null) {
+      await recordMisconception(body.student, body.skill, result.category, result.explanation);
+    }
+    return result;
+  });
+
+  app.post("/chat", async (request, reply) => {
+    const { context, history } = parseChat(request.body);
+    reply.raw.setHeader("Content-Type", "text/plain; charset=utf-8");
+    reply.hijack();
+    try {
+      for await (const chunk of chatTutorStream(context, history)) {
+        reply.raw.write(chunk);
+      }
+    } catch (error) {
+      app.log.error(error);
+    } finally {
+      reply.raw.end();
+    }
+  });
+
+  app.get<{ Params: StudentParams }>("/diagnose/:student", async (request) => {
+    const progress = await getProgress(request.params.student);
+    const misconceptions = await getMisconceptions(request.params.student);
+    const diagnosis = await diagnoseStudent(progress, misconceptions);
+    return { diagnosis };
+  });
+
+  app.get("/class-report", async () => {
+    const students = await listStudents();
+    const report = await classReport(students);
+    return { report };
+  });
+
+  app.post("/generate-problem", async (request) => {
+    const body = parseGenerate(request.body);
+    const generated = await generateProblems(body);
+    return generated;
   });
 }

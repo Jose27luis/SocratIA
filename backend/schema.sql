@@ -35,3 +35,14 @@ CREATE TABLE IF NOT EXISTS translations (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (source_hash, target_lang)
 );
+
+CREATE TABLE IF NOT EXISTS misconceptions (
+    id          BIGSERIAL PRIMARY KEY,
+    student_id  INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    skill       TEXT,
+    category    TEXT NOT NULL,
+    explanation TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_misconceptions_student ON misconceptions (student_id);
