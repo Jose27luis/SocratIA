@@ -38,6 +38,7 @@ import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import { IS_STAGING_OR_DEVELOPMENT } from "./util/getBuildType";
 import TabFocusTrackerWrapper from "./components/TabFocusTrackerWrapper";
 import ViewAllProblems from "./components/problem-layout/ViewAllProblems";
+import LanguageSelector from "./components/LanguageSelector";
 
 // ### BEGIN CUSTOMIZABLE IMPORTS ###
 import config from "./config/firebaseConfig.js";
@@ -524,6 +525,7 @@ class App extends React.Component {
                         />
                     </GlobalErrorBoundary>
                     </LocalizationProvider>
+                    <LanguageSelector />
                 </ThemeContext.Provider>
             </ThemeProvider>
         );

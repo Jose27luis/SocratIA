@@ -1,13 +1,30 @@
 import { TRANSLATE_TARGET, TRANSLATE_URL } from "../config/config.js";
 
 const CACHE_PREFIX = "socrateai_tr_";
+const LANG_KEY = "socrateai_lang";
+
+export function activeLanguage() {
+    try {
+        return localStorage.getItem(LANG_KEY) || TRANSLATE_TARGET;
+    } catch (e) {
+        return TRANSLATE_TARGET;
+    }
+}
+
+export function setLanguage(lang) {
+    try {
+        localStorage.setItem(LANG_KEY, lang);
+    } catch (e) {
+        // ignorar
+    }
+}
 
 export function translationEnabled() {
-    return Boolean(TRANSLATE_TARGET) && Boolean(TRANSLATE_URL);
+    return Boolean(activeLanguage()) && Boolean(TRANSLATE_URL);
 }
 
 function cacheKey(text) {
-    return `${CACHE_PREFIX}${TRANSLATE_TARGET}_${text}`;
+    return `${CACHE_PREFIX}${activeLanguage()}_${text}`;
 }
 
 function readCache(text) {
@@ -57,7 +74,7 @@ export async function translateBatch(texts) {
         const response = await fetch(TRANSLATE_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ texts: missing, target: TRANSLATE_TARGET }),
+            body: JSON.stringify({ texts: missing, target: activeLanguage() }),
         });
         const data = await response.json();
         const translations = Array.isArray(data.translations) ? data.translations : missing;
