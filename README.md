@@ -116,6 +116,94 @@ flowchart TB
 
 Ver el detalle por capa en [§10. Stack tecnológico](#10-stack-tecnológico).
 
+### 5.4 Funcionamiento paso a paso (sistema real desplegado)
+
+Esta sección describe **cómo funciona el sistema ya construido**, con sus componentes, dominios y endpoints reales.
+
+#### 5.4.1 Topología desplegada
+
+Todo corre en un servidor Linux detrás de **nginx**, con Cloudflare aportando el HTTPS público.
+
+| Pieza | Dónde corre | Servicio (systemd) | Función |
+|---|---|---|---|
+| **Tutor (OATutor)** | `cms.net.pe` (estático en nginx) | — | Interfaz donde el alumno resuelve y recibe pistas |
+| **Panel docente** | `cms.net.pe/docente/` (estático) | — | Tablero de progreso del grupo |
+| **Backend** | `127.0.0.1:8001` (Node) | `socrateai` | IA, progreso y LTI; nginx lo expone en `/ai/` y `/lti/` |
+| **Canvas LMS** | `127.0.0.1:3010` (Docker) | `canvas` | LMS que lanza la herramienta vía LTI |
+| **PostgreSQL** | local | — | Alumnos, intentos y dominio por habilidad |
+
+nginx enruta así en `cms.net.pe`: `/ai/` y `/lti/` → backend; `/docente/` → panel; todo lo demás → el tutor. El subdominio `canvas.cms.net.pe` proxea a Canvas.
+
+#### 5.4.2 Paso a paso — el alumno entra desde Canvas (LTI 1.3)
+
+```mermaid
+sequenceDiagram
+    actor Alumno
+    participant Canvas
+    participant BE as Backend (/lti)
+    participant Tutor
+    Alumno->>Canvas: Clic en "SócratIA" del curso
+    Canvas->>BE: POST /lti/login (login_hint)
+    BE->>Canvas: Redirige a authorize_redirect (state + nonce)
+    Canvas->>BE: POST /lti/launch (id_token JWT)
+    BE->>Canvas: Descarga JWKS y valida la firma
+    Note over BE: Verifica firma, iss, aud, exp, nonce
+    BE->>BE: Registra/actualiza al alumno (sub de Canvas)
+    alt Es docente
+        BE-->>Alumno: Abre /docente/ (panel)
+    else Es estudiante
+        BE-->>Alumno: Abre / (tutor)
+    end
+```
+
+1. El alumno hace clic en **SócratIA** en la navegación del curso de Canvas.
+2. Canvas inicia el **OIDC login**: `POST /lti/login`. El backend genera `state` y `nonce` y **redirige** al `authorize_redirect` de Canvas.
+3. Canvas responde con el **launch**: `POST /lti/launch` enviando un **`id_token` (JWT)** firmado.
+4. El backend descarga el **JWKS** de Canvas y **valida** el token: firma, `issuer`, `audience` (nuestro `client_id`), expiración y `nonce`.
+5. Con el `sub` del token (identidad real del usuario en Canvas) se **registra/actualiza el alumno** en PostgreSQL.
+6. Según el **rol**: si es docente abre el **panel** (`/docente/`); si es estudiante abre el **tutor** (`/`). Todo dentro del iframe de Canvas.
+
+#### 5.4.3 Paso a paso — el alumno resuelve un ejercicio y recibe una pista
+
+```mermaid
+sequenceDiagram
+    actor Alumno
+    participant Tutor as Tutor (OATutor)
+    participant BKT as Motor BKT (en el tutor)
+    participant BE as Backend (/ai)
+    participant Claude
+    participant DB as PostgreSQL
+    Alumno->>Tutor: Envía su respuesta
+    Tutor->>BKT: Actualiza P(L) de la habilidad
+    Tutor->>BE: POST /ai/progress/attempt (skill, correct, mastery)
+    BE->>DB: Guarda intento y dominio
+    alt Respuesta incorrecta y pide pista
+        Tutor->>BE: POST /ai/dynamic-hint (problema, error, dominio)
+        BE->>Claude: Prompt socrático (Haiku 4.5)
+        Claude-->>BE: Pista (streaming)
+        BE-->>Tutor: Pista en vivo
+        Tutor-->>Alumno: Muestra la pista
+    end
+```
+
+1. El alumno responde un paso del ejercicio en el tutor.
+2. El **motor BKT** (incrustado en OATutor) actualiza la probabilidad de dominio **P(L)** de cada habilidad del paso.
+3. El tutor envía el intento a `POST /ai/progress/attempt` con la habilidad, si fue correcto y el **dominio actualizado**; el backend lo **persiste** en PostgreSQL ligado al id del alumno (de Canvas o, fuera de Canvas, uno anónimo en `localStorage`).
+4. Si falló y pide ayuda, el tutor llama a `POST /ai/dynamic-hint` con el enunciado, su error, su dominio y las pistas previas.
+5. El backend arma el **prompt socrático** y consulta **Claude Haiku 4.5**, devolviendo la pista en **streaming** (sin revelar la respuesta, adaptada al nivel).
+6. El tutor muestra la pista en vivo a medida que se genera.
+
+#### 5.4.4 Paso a paso — el docente ve el progreso
+
+1. El docente abre el **panel** (`/docente/`), directo o lanzado desde Canvas.
+2. El panel consulta `GET /ai/students`: lista de alumnos con intentos, aciertos y **dominio promedio**.
+3. Al hacer clic en un alumno, consulta `GET /ai/progress/{id}`: **dominio por habilidad** y actividad reciente (aciertos/fallos).
+4. Así el docente identifica los **puntos críticos** del grupo y quién está en riesgo.
+
+#### 5.4.5 Arranque automático
+
+Los servicios `docker`, `canvas`, `socrateai` y `nginx` están habilitados en systemd; tras reiniciar el servidor, el sistema completo se levanta solo y en orden. Config versionada en [`deploy/`](./deploy).
+
 ---
 
 ## 6. Métodos
