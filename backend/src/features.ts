@@ -171,7 +171,13 @@ export async function generateProblems(input: GenerateProblemInput): Promise<unk
       '{"lesson": "<nombre de la lección>", "problems": [{"title": "<título>", "body": "<enunciado>", ' +
       '"skill": "<habilidad>", "stepTitle": "<pregunta>", "answer": "<respuesta correcta>", ' +
       '"choices": ["<opción correcta>", "<distractor1>", "<distractor2>", "<distractor3>"]}]}\n' +
-      "Las opciones deben incluir la respuesta correcta. Sin texto adicional.",
+      "Las opciones deben incluir la respuesta correcta. " +
+      "ADAPTA AL NIVEL: si el nivel es secundaria o primaria alta (4°-6°), usa lenguaje normal con texto. " +
+      "Si el nivel es INICIAL o PRIMARIA BAJA (1°-2°), son niños que recién aprenden a leer: usa un enunciado " +
+      "muy corto y una sola idea, vocabulario simple, y haz que CADA opción sea un EMOJI grande y representativo " +
+      "(por ejemplo contar objetos, colores o formas); si agregas palabra, que sea una sola. El campo 'answer' debe " +
+      "ser exactamente igual a una de las opciones (mismo emoji y texto). Usa emojis distintos entre las opciones. " +
+      "Sin texto adicional.",
     messages: [
       {
         role: "user",
