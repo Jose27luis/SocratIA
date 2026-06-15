@@ -4,6 +4,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import { renderText } from '../../platform-logic/renderText.js';
+import { speak, hasReadableText } from '../../platform-logic/speech.js';
 import { ThemeContext } from "../../config/config";
 
 class MultipleChoice extends React.Component {
@@ -40,12 +41,34 @@ class MultipleChoice extends React.Component {
                 <FormControl>
                     <RadioGroup value={this.state.value} onChange={this.handleChange}>
                         {choices.length > 0
-                            ? choices.map((choice, i) =>
-                                <FormControlLabel value={choice} control={<Radio/>}
-                                    label={renderText(
-                                        (translatedChoices && translatedChoices[choice]) || choice,
-                                        null, variabilization, this.context)}
-                                    key={choice}/>)
+                            ? choices.map((choice, i) => {
+                                const display = (translatedChoices && translatedChoices[choice]) || choice;
+                                const visual = !hasReadableText(display);
+                                return (
+                                    <div key={choice} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                        <FormControlLabel
+                                            value={choice}
+                                            control={<Radio />}
+                                            label={
+                                                <span style={visual ? { fontSize: "2.4rem", lineHeight: 1.2 } : {}}>
+                                                    {renderText(display, null, variabilization, this.context)}
+                                                </span>
+                                            }
+                                        />
+                                        {!visual && (
+                                            <button
+                                                type="button"
+                                                aria-label="Escuchar opción"
+                                                onClick={() => speak(display)}
+                                                style={{
+                                                    border: "none", background: "transparent", cursor: "pointer",
+                                                    fontSize: "1.1rem", lineHeight: 1, padding: "4px",
+                                                }}
+                                            >🔊</button>
+                                        )}
+                                    </div>
+                                );
+                            })
                             : "Error: This problem has no answer choices. Please submit feedback."}
                     </RadioGroup>
                 </FormControl>

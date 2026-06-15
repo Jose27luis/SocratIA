@@ -17,6 +17,7 @@ import {
     renderText,
 } from "../../platform-logic/renderText.js";
 import { translateBatch, translationEnabled } from "../../platform-logic/translate.js";
+import { speak, ensureTtsToggle } from "../../platform-logic/speech.js";
 import {
     DYNAMIC_HINT_URL,
     DYNAMIC_HINT_TEMPLATE,
@@ -213,7 +214,17 @@ class ProblemCard extends React.Component {
         // Start an asynchronous task
         this.updateBioInfo();
         this.translateStep();
+        ensureTtsToggle();
+        this.readQuestionAloud();
     }
+
+    readQuestionAloud = () => {
+        const question =
+            (this.state.translated?.stepTitle ?? this.step.stepTitle ?? "") +
+            ". " +
+            (this.state.translated?.stepBody ?? this.step.stepBody ?? "");
+        speak(question);
+    };
 
     translateStep = async () => {
         if (!translationEnabled()) {
@@ -704,6 +715,16 @@ class ProblemCard extends React.Component {
             <Card className={classes.card}>
                 <CardContent>
                     <h2 className={classes.stepHeader}>
+                        <button
+                            type="button"
+                            aria-label="Escuchar la pregunta"
+                            onClick={this.readQuestionAloud}
+                            style={{
+                                border: "none", background: "transparent", cursor: "pointer",
+                                fontSize: "1.4rem", lineHeight: 1, padding: "2px 8px 2px 0",
+                                verticalAlign: "middle",
+                            }}
+                        >🔊</button>
                         {renderText(
                             this.state.translated?.stepTitle ?? this.step.stepTitle,
                             problemID,
