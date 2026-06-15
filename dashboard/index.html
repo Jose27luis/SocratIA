@@ -150,7 +150,8 @@
     .gen-form input, .gen-form select { font-family: 'Public Sans', sans-serif; font-size: 14.5px; border: 1px solid var(--line-2); border-radius: 8px; padding: 11px 14px; color: var(--ink); background: #fff; outline: none; transition: all .15s; }
     .gen-form input:focus, .gen-form select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(47,107,79,0.13); }
     .gen-form #genTopic { width: 280px; }
-    .gen-form #genLevel { width: 150px; }
+    .gen-form #genLevel { width: 140px; cursor: pointer; }
+    .gen-form #genGrade { width: 130px; cursor: pointer; }
     .gen-form #genCount { width: 88px; font-variant-numeric: tabular-nums; }
     .gen-form #genLang { width: 170px; cursor: pointer; }
     .gen-section-title { display: flex; align-items: center; gap: 10px; margin: 30px 0 14px; }
@@ -287,7 +288,16 @@
           <p class="muted">Crea ejercicios de opción múltiple con IA sobre cualquier tema y nivel.</p>
           <div class="gen-form">
             <div class="gen-field"><label>Tema</label><input id="genTopic" placeholder="ej. ecuaciones lineales" /></div>
-            <div class="gen-field"><label>Nivel</label><input id="genLevel" value="secundaria" /></div>
+            <div class="gen-field"><label>Nivel</label>
+              <select id="genLevel">
+                <option value="inicial">Inicial</option>
+                <option value="primaria">Primaria</option>
+                <option value="secundaria" selected>Secundaria</option>
+              </select>
+            </div>
+            <div class="gen-field"><label>Grado</label>
+              <select id="genGrade"></select>
+            </div>
             <div class="gen-field"><label>Cantidad</label><input id="genCount" type="number" min="1" max="6" value="3" /></div>
             <div class="gen-field"><label>Idioma</label>
               <select id="genLang">
@@ -310,6 +320,8 @@
 
   <script type="module">
     const API = "/ai";
+    const COURSE = new URLSearchParams(location.search).get("course");
+    const COURSE_QS = COURSE ? `?course=${encodeURIComponent(COURSE)}` : "";
     let STUDENTS = [];
 
     const AV = ["#E2ECE5/#1F4D3A","#E6E9EC/#3A4750","#F1E4DF/#9A3F33","#E9EADD/#4A5D23","#EFE6DA/#7A5230","#E2E9EC/#2F5D6B","#ECE6DD/#5A4A2E","#E6E2EC/#4A3F6B"];
@@ -407,21 +419,109 @@
         <div class="drawer-body">
           <div class="sec-title">Dominio por habilidad</div>${skills}
           <div class="sec-title">Actividad reciente</div><div class="timeline">${recent}</div>
-          <div class="sec-title">Diagnóstico con IA</div>
-          <button class="btn btn-primary" id="diagBtn" style="width:100%;justify-content:center">Generar diagnóstico de este alumno</button>
+          <div class="sec-title">Informe individual</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="diagBtn" style="flex:1;justify-content:center">Generar diagnóstico con IA</button>
+            <button class="btn btn-ghost" id="printBtn">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"></path><rect x="6" y="13" width="12" height="8" rx="1"></rect><path d="M6 17H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"></path></svg>
+              Imprimir / PDF
+            </button>
+          </div>
           <div class="ai-body" id="diagBox" style="margin-top:16px"></div>
         </div>`;
       drawer.querySelector(".close").addEventListener("click",closeDrawer);
-      drawer.querySelector("#diagBtn").addEventListener("click",async(e)=>{
-        const btn=e.currentTarget, box=document.getElementById("diagBox");
-        btn.disabled=true; btn.textContent="Analizando…";
+      let diagMarkdown="";
+      async function ensureDiagnosis(){
+        if(diagMarkdown) return diagMarkdown;
+        const box=document.getElementById("diagBox");
         box.innerHTML='<span class="ai-tag"><span class="dot"></span> SócratIA · IA</span><div class="muted" style="margin-top:10px">Generando diagnóstico…</div>';
-        try{ const d=await (await fetch(`${API}/diagnose/${id}`)).json();
-          box.innerHTML='<span class="ai-tag"><span class="dot"></span> SócratIA · IA</span><div style="margin-top:12px">'+renderMarkdown(d.diagnosis||"Sin datos suficientes.")+'</div>'; }
-        catch(err){ box.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
+        const d=await (await fetch(`${API}/diagnose/${id}`)).json();
+        diagMarkdown=renderMarkdown(d.diagnosis||"Sin datos suficientes.");
+        box.innerHTML='<span class="ai-tag"><span class="dot"></span> SócratIA · IA</span><div style="margin-top:12px">'+diagMarkdown+'</div>';
+        return diagMarkdown;
+      }
+      drawer.querySelector("#diagBtn").addEventListener("click",async(e)=>{
+        const btn=e.currentTarget;
+        btn.disabled=true; btn.textContent="Analizando…"; diagMarkdown="";
+        try{ await ensureDiagnosis(); }
+        catch(err){ document.getElementById("diagBox").innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
         btn.disabled=false; btn.textContent="Regenerar diagnóstico";
       });
+      drawer.querySelector("#printBtn").addEventListener("click",async(e)=>{
+        const btn=e.currentTarget; btn.disabled=true;
+        try{ const dg=await ensureDiagnosis(); printStudentReport(s,data,dg); }
+        catch(err){ printStudentReport(s,data,`<p style="color:#9A3F33">No se pudo generar el diagnóstico: ${err.message}</p>`); }
+        btn.disabled=false;
+      });
     }
+    function printStudentReport(s,data,diagHtml){
+      const name=displayName(s);
+      const now=new Date().toLocaleString("es-PE",{dateStyle:"long",timeStyle:"short"});
+      const acc=pct(data.correctTotal,data.attemptsTotal);
+      const masteries=data.mastery.map(m=>m.mastery).filter(v=>v!=null);
+      const avg=masteries.length?Math.round(masteries.reduce((a,v)=>a+v,0)/masteries.length*100):"—";
+      const skills=data.mastery.map(m=>`<tr><td>${m.skill}</td><td class="r">${m.attempts}</td><td class="r b">${Math.round(m.mastery*100)}%</td></tr>`).join("")||`<tr><td colspan="3" class="empty">Sin habilidades registradas.</td></tr>`;
+      const recent=data.recent.slice(0,12).map(a=>`<tr><td>${a.skill??"—"}</td><td>${a.correct?'<span class="ok">Correcto</span>':'<span class="no">Incorrecto</span>'}</td><td class="m">${fmtDate(a.createdAt)}</td></tr>`).join("")||`<tr><td colspan="3" class="empty">Sin actividad registrada.</td></tr>`;
+      const w=window.open("","_blank","width=860,height=1000");
+      if(!w){ alert("Habilita las ventanas emergentes para imprimir el informe."); return; }
+      w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Informe individual · ${name}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Public Sans',system-ui,sans-serif;color:#1B2420;background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:720px;margin:0 auto;padding:42px 46px}
+  .head{display:flex;align-items:center;gap:16px;border-bottom:2px solid #1F4D3A;padding-bottom:20px}
+  .mark{width:48px;height:48px;border-radius:11px;background:#1F4D3A;color:#F4EFE2;display:flex;align-items:center;justify-content:center;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:24px}
+  .head h1{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:22px;letter-spacing:-0.01em}
+  .head .sub{font-size:13px;color:#6F6B5E;margin-top:2px}
+  .meta{margin-top:22px}
+  .meta .who{font-family:'Source Serif 4',Georgia,serif;font-size:26px;font-weight:600}
+  .meta .id{font-size:13px;color:#928C7C;margin-top:3px}
+  .meta .date{font-size:13px;color:#6F6B5E;margin-top:8px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}
+  .kpi{border:1px solid #ECE7DB;border-top:3px solid #1F4D3A;border-radius:9px;padding:14px 16px}
+  .kpi .l{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#928C7C}
+  .kpi .v{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px}
+  h2{font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;margin:30px 0 10px;padding-bottom:6px;border-bottom:1px solid #ECE7DB}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  td{padding:9px 4px;border-bottom:1px solid #F1ECE0}
+  td.r{text-align:right;font-variant-numeric:tabular-nums}
+  td.b{font-weight:700}
+  td.m{color:#928C7C;font-size:12.5px}
+  td.empty{color:#928C7C;text-align:center;padding:16px}
+  .ok{color:#1F4D3A;font-weight:600}
+  .no{color:#9A3F33;font-weight:600}
+  .diag{margin-top:6px;background:#FBF9F2;border:1px solid #ECE7DB;border-radius:10px;padding:18px 22px;font-size:14px;line-height:1.6}
+  .diag h3{font-family:'Source Serif 4',Georgia,serif;font-size:14px;font-weight:600;margin:12px 0 4px}
+  .diag h3:first-child{margin-top:0}
+  .diag ul{margin:4px 0 10px;padding-left:18px}
+  .diag li{margin:3px 0}
+  .diag p{margin:0 0 8px}
+  .diag strong{font-weight:600}
+  .foot{margin-top:34px;padding-top:16px;border-top:1px solid #ECE7DB;font-size:11.5px;color:#A39D8C;display:flex;justify-content:space-between}
+  @media print{ .wrap{padding:24px 0} @page{margin:16mm} }
+</style></head><body><div class="wrap">
+  <div class="head"><div class="mark">S</div><div><h1>SócratIA · Informe individual</h1><div class="sub">Sistema de tutoría inteligente adaptativa</div></div></div>
+  <div class="meta"><div class="who">${name}</div><div class="id">${s.externalId||""}</div><div class="date">Generado el ${now}</div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="l">Intentos</div><div class="v">${data.attemptsTotal}</div></div>
+    <div class="kpi"><div class="l">Aciertos</div><div class="v">${data.correctTotal}</div></div>
+    <div class="kpi"><div class="l">% Acierto</div><div class="v">${acc}%</div></div>
+    <div class="kpi"><div class="l">Dominio</div><div class="v">${avg==="—"?"—":avg+"%"}</div></div>
+  </div>
+  <h2>Dominio por habilidad</h2>
+  <table><tbody>${skills}</tbody></table>
+  <h2>Actividad reciente</h2>
+  <table><tbody>${recent}</tbody></table>
+  <h2>Diagnóstico pedagógico (IA)</h2>
+  <div class="diag">${diagHtml}</div>
+  <div class="foot"><span>SócratIA · cms.net.pe</span><span>Informe confidencial para uso docente</span></div>
+</div></body></html>`);
+      w.document.close();
+      setTimeout(()=>{ w.focus(); w.print(); }, 600);
+    }
+
     function closeDrawer(){ document.getElementById("drawer").classList.remove("open"); document.getElementById("overlay").classList.remove("open"); }
     document.getElementById("overlay").addEventListener("click",closeDrawer);
 
@@ -441,12 +541,25 @@
       const btn=e.currentTarget, box=document.getElementById("reportBox");
       btn.disabled=true; btn.textContent="Analizando el grupo…";
       box.innerHTML='<div class="muted">Generando informe…</div>';
-      try{ const d=await (await fetch(`${API}/class-report`)).json(); box.innerHTML=renderMarkdown(d.report||"Sin datos."); }
+      try{ const d=await (await fetch(`${API}/class-report${COURSE_QS}`)).json(); box.innerHTML=renderMarkdown(d.report||"Sin datos."); }
       catch(err){ box.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
       btn.disabled=false; btn.textContent="Regenerar informe";
     });
 
     // generator
+    const GRADES={
+      inicial:["3 años","4 años","5 años"],
+      primaria:["1° grado","2° grado","3° grado","4° grado","5° grado","6° grado"],
+      secundaria:["1° grado","2° grado","3° grado","4° grado","5° grado"],
+    };
+    function fillGrades(){
+      const lvl=document.getElementById("genLevel").value;
+      const sel=document.getElementById("genGrade");
+      sel.innerHTML=(GRADES[lvl]||[]).map(g=>`<option value="${g}">${g}</option>`).join("");
+    }
+    document.getElementById("genLevel").addEventListener("change",fillGrades);
+    fillGrades();
+
     let lastGenerated=null;
     document.getElementById("genRun").addEventListener("click",async(e)=>{
       const btn=e.currentTarget, topic=document.getElementById("genTopic").value.trim(), result=document.getElementById("genResult");
@@ -454,7 +567,9 @@
       btn.disabled=true; btn.textContent="Generando…"; lastGenerated=null;
       result.innerHTML='<div class="muted" style="margin-top:18px">Creando ejercicios con IA…</div>';
       try{
-        const d=await (await fetch(`${API}/generate-problem`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,level:document.getElementById("genLevel").value.trim()||"básico",language:document.getElementById("genLang").value,count:Number(document.getElementById("genCount").value)||3})})).json();
+        const lvl=document.getElementById("genLevel").value, grd=document.getElementById("genGrade").value;
+        const level=grd?`${grd} de ${lvl}`:lvl;
+        const d=await (await fetch(`${API}/generate-problem`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,level,language:document.getElementById("genLang").value,count:Number(document.getElementById("genCount").value)||3})})).json();
         const probs=Array.isArray(d.problems)?d.problems:[];
         lastGenerated={lesson:d.lesson||topic, language:document.getElementById("genLang").value, problems:probs};
         result.innerHTML=`<div class="gen-section-title"><span>Lección: ${d.lesson||topic}</span><span></span></div>`+probs.map(p=>`
@@ -493,7 +608,7 @@
 
     async function load(){
       try{
-        STUDENTS=await (await fetch(`${API}/students`)).json();
+        STUDENTS=await (await fetch(`${API}/students${COURSE_QS}`)).json();
         renderKpis(STUDENTS); renderRows(STUDENTS); renderRisk(STUDENTS);
       }catch(err){
         document.getElementById("rows").innerHTML=`<tr><td colspan="6" class="empty">Error cargando datos: ${err.message}</td></tr>`;
