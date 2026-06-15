@@ -6,178 +6,194 @@
   <title>SócratIA · Panel docente</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #15101f;
-      --ink-2: #4a4458;
-      --ink-3: #6f6982;
-      --bg: #f3f1f8;
+      --ink: #1B2420;
+      --ink-2: #6F6B5E;
+      --ink-3: #928C7C;
+      --bg: #FAF8F2;
       --surface: #ffffff;
-      --line: #e7e2f1;
-      --brand: #6d28d9;
-      --brand-deep: #4c1d95;
-      --brand-2: #a855f7;
-      --accent: #0e7490;
-      --ok: #059669;
-      --ok-bg: #e8f7f0;
-      --bad: #e11d48;
-      --bad-bg: #fdeaef;
-      --warn: #d97706;
-      --side-1: #1c1530;
-      --side-2: #2a1b4d;
-      --radius: 16px;
-      --shadow: 0 10px 30px rgba(21, 16, 31, 0.08);
-      --shadow-lg: 0 24px 60px rgba(21, 16, 31, 0.18);
+      --line: #ECE7DB;
+      --line-2: #E2DCCD;
+      --side: #F1ECE0;
+      --side-hover: #EBE5D7;
+      --brand: #2F6B4F;
+      --brand-deep: #1F4D3A;
+      --brand-darker: #173A2C;
+      --brand-2: #4F8B6B;
+      --brand-soft: #E7EFEA;
+      --ok: #1F4D3A;
+      --ok-bg: #E2ECE4;
+      --bad: #9A3F33;
+      --bad-bg: #F4E7E2;
+      --warn: #9A6B1F;
+      --warn-bg: #F2E9D5;
+      --radius: 13px;
+      --shadow: 0 1px 2px rgba(27,36,32,0.04);
+      --shadow-lg: 0 24px 60px rgba(27,36,32,0.20);
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; }
     body {
-      font-family: 'Manrope', sans-serif;
+      font-family: 'Public Sans', system-ui, sans-serif;
       background: var(--bg);
       color: var(--ink);
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
-    h1, h2, h3, .num { font-family: 'Sora', sans-serif; }
+    h1, h2, h3, .serif { font-family: 'Source Serif 4', Georgia, serif; }
+    .num { font-variant-numeric: tabular-nums; }
+    ::-webkit-scrollbar { width: 11px; height: 11px; }
+    ::-webkit-scrollbar-thumb { background: #DDD6C7; border-radius: 99px; border: 3px solid var(--bg); }
 
-    .app { display: grid; grid-template-columns: 264px 1fr; min-height: 100vh; }
+    .app { display: grid; grid-template-columns: 266px 1fr; min-height: 100vh; }
 
     /* ---------- Sidebar ---------- */
     .sidebar {
       position: sticky; top: 0; height: 100vh;
-      background: radial-gradient(120% 80% at 20% 0%, #3a2470 0%, var(--side-2) 40%, var(--side-1) 100%);
-      color: #ece8f7; padding: 26px 20px; display: flex; flex-direction: column;
-      border-right: 1px solid rgba(255,255,255,0.06);
+      background: var(--side); border-right: 1px solid var(--line-2);
+      padding: 26px 18px 22px; display: flex; flex-direction: column;
     }
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 34px; }
+    .brand { display: flex; align-items: center; gap: 13px; padding: 0 6px 4px; }
     .brand .mark {
-      width: 42px; height: 42px; border-radius: 12px; flex: none;
-      background: linear-gradient(135deg, #8b5cf6, #4c1d95);
-      display: grid; place-items: center; font-family: 'Sora'; font-weight: 800; font-size: 20px; color: #fff;
-      box-shadow: 0 8px 20px rgba(139,92,246,0.45);
+      width: 42px; height: 42px; border-radius: 11px; flex: none;
+      background: var(--brand-deep);
+      display: grid; place-items: center; font-family: 'Source Serif 4', Georgia, serif; font-weight: 700; font-size: 22px; color: #F4EFE2;
+      box-shadow: 0 2px 8px rgba(31,77,58,0.22);
     }
-    .brand .name { font-family: 'Sora'; font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
-    .brand .sub { font-size: 12px; color: #b3a9d6; margin-top: 1px; }
-    .nav { display: flex; flex-direction: column; gap: 4px; }
+    .brand .name { font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 19px; letter-spacing: -0.01em; line-height: 1.1; }
+    .brand .sub { font-size: 12.5px; color: var(--ink-3); margin-top: 2px; }
+    .nav { display: flex; flex-direction: column; gap: 3px; margin-top: 30px; }
     .nav button {
       display: flex; align-items: center; gap: 12px; width: 100%;
-      background: transparent; border: none; color: #c5bce4; cursor: pointer;
-      font-family: 'Manrope'; font-size: 14.5px; font-weight: 600; text-align: left;
-      padding: 11px 14px; border-radius: 11px; transition: all .18s ease;
+      background: transparent; border: none; color: var(--ink-2); cursor: pointer;
+      font-family: 'Public Sans', sans-serif; font-size: 14.5px; font-weight: 500; text-align: left;
+      padding: 10px 14px; border-radius: 8px; transition: all .16s ease;
     }
-    .nav button .ic { width: 18px; height: 18px; opacity: .9; }
-    .nav button:hover { background: rgba(255,255,255,0.07); color: #fff; }
-    .nav button.active { background: linear-gradient(100deg, rgba(139,92,246,0.30), rgba(139,92,246,0.10)); color: #fff; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.35); }
-    .side-foot { margin-top: auto; font-size: 12px; color: #8f86b3; line-height: 1.6; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-    .side-foot a { color: #b9aee2; text-decoration: none; }
+    .nav button .ic { width: 18px; height: 18px; flex: none; }
+    .nav button:hover { background: var(--side-hover); color: var(--ink); }
+    .nav button.active { background: var(--brand-soft); color: var(--brand-deep); font-weight: 600; box-shadow: inset 3px 0 0 var(--brand-deep); }
+    .side-foot { margin-top: auto; font-size: 12px; color: var(--ink-3); line-height: 1.5; padding-top: 16px; border-top: 1px solid var(--line-2); margin: 0 6px; }
+    .side-foot a { color: var(--brand); text-decoration: none; font-weight: 600; font-size: 12.5px; }
 
     /* ---------- Content ---------- */
-    .content { padding: 30px 38px 60px; max-width: 1180px; }
-    .topbar { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 26px; }
-    .topbar h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
-    .topbar p { margin: 4px 0 0; color: var(--ink-2); font-size: 14.5px; }
+    .content { padding: 40px 48px 72px; max-width: 1180px; margin: 0 auto; width: 100%; }
+    .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+    .topbar h1 { margin: 0; font-size: 31px; font-weight: 600; letter-spacing: -0.015em; }
+    .topbar p { margin: 7px 0 0; color: var(--ink-2); font-size: 15px; }
     .btn {
-      font-family: 'Manrope'; font-weight: 700; font-size: 14px; cursor: pointer;
-      border-radius: 11px; padding: 11px 18px; border: 1px solid transparent; transition: all .18s ease;
+      font-family: 'Public Sans', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer;
+      border-radius: 8px; padding: 9px 16px; border: 1px solid transparent; transition: all .16s ease;
+      display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-primary { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); color: #fff; box-shadow: 0 8px 20px rgba(109,40,217,0.28); }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(109,40,217,0.40); }
-    .btn-primary:disabled { opacity: .6; cursor: progress; transform: none; }
-    .btn-ghost { background: var(--surface); color: var(--brand-deep); border-color: var(--line); }
-    .btn-ghost:hover { border-color: var(--brand-2); }
+    .btn .ic { width: 15px; height: 15px; }
+    .btn-primary { background: var(--brand-deep); color: #F4EFE2; box-shadow: 0 2px 10px rgba(31,77,58,0.2); }
+    .btn-primary:hover { background: var(--brand-darker); }
+    .btn-primary:disabled { opacity: .65; cursor: progress; }
+    .btn-ghost { background: var(--surface); color: #3A3F39; border-color: var(--line-2); flex-shrink: 0; }
+    .btn-ghost:hover { background: #F5F1E7; border-color: #C9C2B0; }
 
-    .view { display: none; animation: rise .4s ease both; }
+    .view { display: none; animation: rise .35s ease both; }
     .view.active { display: block; }
-    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
     /* KPIs */
     .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 26px; }
-    .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
-    .kpi::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); }
-    .kpi .label { font-size: 12.5px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
-    .kpi .num { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; margin-top: 8px; color: var(--ink); }
-    .kpi .foot { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+    .kpi { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--brand-deep); border-radius: 11px; padding: 22px 24px; }
+    .kpi .label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .07em; }
+    .kpi .num { font-size: 42px; font-weight: 700; letter-spacing: -0.01em; margin: 10px 0 5px; line-height: 1.05; color: var(--ink); }
+    .kpi .foot { font-size: 13px; color: var(--ink-2); }
 
-    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-    .panel-head { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
-    .panel-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .panel-head { padding: 20px 26px; border-bottom: 1px solid var(--side); display: flex; align-items: center; justify-content: space-between; }
+    .panel-head h2 { margin: 0; font-size: 19px; font-weight: 600; }
     .panel-head .hint { font-size: 13px; color: var(--ink-3); }
 
     table { width: 100%; border-collapse: collapse; }
-    thead th { text-align: left; font-size: 11.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; padding: 13px 22px; background: #faf9fd; border-bottom: 1px solid var(--line); }
-    tbody td { padding: 15px 22px; border-bottom: 1px solid #f1eef8; font-size: 14.5px; color: var(--ink); }
-    tbody tr { cursor: pointer; transition: background .15s ease; }
-    tbody tr:hover { background: #faf8ff; }
-    tbody tr:last-child td { border-bottom: none; }
-    .who { display: flex; align-items: center; gap: 11px; }
-    .avatar { width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center; font-family: 'Sora'; font-weight: 700; font-size: 14px; color: #fff; }
-    .who .nm { font-weight: 600; }
-    .who .badge { font-size: 10.5px; font-weight: 700; color: var(--brand-deep); background: #efe9fc; padding: 1px 7px; border-radius: 999px; letter-spacing: .03em; }
-    .num-cell { font-variant-numeric: tabular-nums; font-weight: 600; }
+    thead th { text-align: left; font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; padding: 12px 26px; background: #FBF8F0; border-bottom: 1px solid var(--side); }
+    tbody td { padding: 16px 26px; border-top: 1px solid #F4EFE3; font-size: 14.5px; color: var(--ink); }
+    tbody tr { cursor: pointer; transition: background .14s ease; }
+    tbody tr:hover { background: #FBF9F2; }
+    .who { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .avatar { width: 38px; height: 38px; border-radius: 9px; flex: none; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+    .who .nm { font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .who .badge { display: inline-block; margin-top: 3px; font-size: 9.5px; font-weight: 700; letter-spacing: .08em; color: #7A745F; background: #EEE8D8; padding: 2px 6px; border-radius: 4px; }
+    .num-cell { font-variant-numeric: tabular-nums; color: #3F443D; }
 
-    .bar { height: 8px; width: 130px; border-radius: 99px; background: #ece8f5; overflow: hidden; }
-    .bar > span { display: block; height: 100%; border-radius: 99px; }
-    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+    .bar { flex: 1; max-width: 128px; height: 7px; border-radius: 999px; background: #ECE6D8; overflow: hidden; }
+    .bar > span { display: block; height: 100%; border-radius: 999px; }
+    .pill { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 3px 11px; border-radius: 999px; font-variant-numeric: tabular-nums; }
     .pill.ok { background: var(--ok-bg); color: var(--ok); }
-    .pill.warn { background: #fdf3e7; color: var(--warn); }
+    .pill.warn { background: var(--warn-bg); color: var(--warn); }
     .pill.bad { background: var(--bad-bg); color: var(--bad); }
     .muted { color: var(--ink-3); }
     .empty { padding: 50px; text-align: center; color: var(--ink-3); }
 
     /* AI blocks */
-    .ai-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
-    .ai-tag { display: inline-flex; align-items: center; gap: 7px; font-family: 'Sora'; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--brand-deep); background: linear-gradient(100deg, #efe9fc, #f7effe); padding: 5px 11px; border-radius: 999px; margin-bottom: 14px; }
-    .ai-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 0 3px rgba(168,85,247,.25); }
-    .ai-body { line-height: 1.7; color: var(--ink); font-size: 14.5px; }
-    .ai-body h1, .ai-body h2, .ai-body h3 { color: var(--brand-deep); font-size: 15px; margin: 14px 0 6px; }
-    .ai-body ul { margin: 6px 0; padding-left: 20px; }
-    .ai-body li { margin: 3px 0; }
-    .ai-body strong { color: var(--ink); font-weight: 700; }
-    .ai-body p { margin: 7px 0; }
+    .ai-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 34px; }
+    .ai-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--brand); background: var(--brand-soft); padding: 5px 11px; border-radius: 999px; }
+    .ai-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+    .ai-card h2 { margin: 16px 0 8px; font-size: 23px; font-weight: 600; }
+    .ai-card > p.muted { margin: 0 0 22px; font-size: 15px; max-width: 560px; line-height: 1.55; color: var(--ink-2); }
+    .ai-body { line-height: 1.65; color: #4A4A40; font-size: 14.5px; }
+    .ai-body h1, .ai-body h2, .ai-body h3 { font-family: 'Source Serif 4', Georgia, serif; color: var(--ink); font-size: 17px; font-weight: 600; margin: 22px 0 8px; }
+    .ai-body ul { margin: 6px 0 16px; padding-left: 20px; }
+    .ai-body li { margin: 5px 0; }
+    .ai-body strong { color: var(--ink); font-weight: 600; }
+    .ai-body p { margin: 0 0 14px; max-width: 700px; }
 
     /* Generator */
-    .gen-form { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 18px; }
-    .gen-form input, .gen-form select { font-family: 'Manrope'; font-size: 14px; border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; color: var(--ink); background: #fbfaff; outline: none; transition: border .15s; }
-    .gen-form input:focus, .gen-form select:focus { border-color: var(--brand-2); }
-    .gen-form #genTopic { flex: 1; min-width: 240px; }
-    .gen-form #genCount { width: 84px; }
-    .gen-problem { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-top: 14px; background: #fcfbff; }
-    .gen-problem .skill { font-size: 12px; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .04em; }
-    .gen-problem .ttl { font-family: 'Sora'; font-weight: 700; font-size: 16px; margin: 6px 0 2px; }
-    .gen-problem .q { font-weight: 600; margin: 10px 0 8px; color: var(--ink); }
-    .gen-choice { padding: 8px 13px; margin: 6px 0; border-radius: 9px; font-size: 14px; border: 1px solid var(--line); background: #fff; }
-    .gen-choice.correct { background: var(--ok-bg); border-color: #b7ebd4; color: #044e3b; font-weight: 700; }
+    .gen-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 4px 0 4px; }
+    .gen-field { display: flex; flex-direction: column; }
+    .gen-field label { font-size: 11px; font-weight: 600; letter-spacing: .05em; color: var(--ink-3); text-transform: uppercase; margin-bottom: 6px; }
+    .gen-form input, .gen-form select { font-family: 'Public Sans', sans-serif; font-size: 14.5px; border: 1px solid var(--line-2); border-radius: 8px; padding: 11px 14px; color: var(--ink); background: #fff; outline: none; transition: all .15s; }
+    .gen-form input:focus, .gen-form select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(47,107,79,0.13); }
+    .gen-form #genTopic { width: 280px; }
+    .gen-form #genLevel { width: 150px; }
+    .gen-form #genCount { width: 88px; font-variant-numeric: tabular-nums; }
+    .gen-form #genLang { width: 170px; cursor: pointer; }
+    .gen-section-title { display: flex; align-items: center; gap: 10px; margin: 30px 0 14px; }
+    .gen-section-title span:first-child { font-size: 12px; font-weight: 700; letter-spacing: .07em; color: #7A745F; text-transform: uppercase; }
+    .gen-section-title span:last-child { flex: 1; height: 1px; background: #EEE8D8; }
+    .gen-problem { border: 1px solid var(--line); border-radius: 11px; padding: 24px 26px; margin-top: 16px; background: #FCFAF4; }
+    .gen-problem .skill { font-size: 11px; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+    .gen-problem .ttl { font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 19px; margin: 0 0 6px; }
+    .gen-problem .q { font-weight: 600; margin: 14px 0 12px; color: var(--ink); font-size: 15px; }
+    .gen-choice { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 18px; margin: 9px 0; border-radius: 9px; font-size: 15px; border: 1px solid #E6E0D2; background: #fff; }
+    .gen-choice.correct { background: #ECF3EE; border: 1.5px solid var(--brand); }
+    .gen-choice .ok-tag { display: inline-flex; align-items: center; gap: 6px; color: var(--brand); font-size: 12.5px; font-weight: 600; }
 
     /* Drawer */
-    .overlay { position: fixed; inset: 0; background: rgba(21,16,31,.45); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 40; }
+    .overlay { position: fixed; inset: 0; background: rgba(27,36,32,.40); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 40; }
     .overlay.open { opacity: 1; pointer-events: auto; }
     .drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 480px; max-width: 92vw; background: var(--bg); box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); z-index: 50; overflow-y: auto; }
     .drawer.open { transform: none; }
-    .drawer-head { padding: 26px 26px 20px; background: linear-gradient(140deg, var(--side-2), var(--side-1)); color: #fff; position: relative; }
-    .drawer-head .close { position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,.14); color: #fff; font-size: 18px; cursor: pointer; }
-    .drawer-head .close:hover { background: rgba(255,255,255,.25); }
-    .drawer-head h2 { margin: 0; font-size: 20px; word-break: break-word; }
-    .drawer-chips { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-    .chip { background: rgba(255,255,255,.12); border-radius: 11px; padding: 9px 13px; }
-    .chip .v { font-family: 'Sora'; font-weight: 700; font-size: 18px; }
-    .chip .l { font-size: 11px; color: #cfc6ea; text-transform: uppercase; letter-spacing: .04em; }
-    .drawer-body { padding: 22px 26px 40px; }
-    .sec-title { font-family: 'Sora'; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin: 22px 0 12px; }
-    .skill-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #ece8f5; }
+    .drawer-head { padding: 28px 26px 22px; background: var(--brand-deep); color: #F4EFE2; position: relative; }
+    .drawer-head .close { position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 9px; border: none; background: rgba(255,255,255,.13); color: #fff; font-size: 18px; cursor: pointer; }
+    .drawer-head .close:hover { background: rgba(255,255,255,.24); }
+    .drawer-head h2 { margin: 0; font-size: 21px; font-weight: 600; word-break: break-word; }
+    .drawer-chips { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    .chip { background: rgba(255,255,255,.12); border-radius: 10px; padding: 10px 14px; }
+    .chip .v { font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 19px; font-variant-numeric: tabular-nums; }
+    .chip .l { font-size: 11px; color: #D6E0DA; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+    .drawer-body { padding: 24px 26px 44px; }
+    .sec-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin: 24px 0 12px; }
+    .skill-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EEE8D8; }
     .skill-row .nm { flex: 1; font-weight: 600; font-size: 14px; }
     .skill-row .pct { width: 44px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
     .timeline { display: flex; flex-direction: column; }
-    .tl { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid #ece8f5; font-size: 14px; }
+    .tl { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-bottom: 1px solid #EEE8D8; font-size: 14px; }
     .tl .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-    .tl .dot.ok { background: var(--ok); } .tl .dot.bad { background: var(--bad); }
+    .tl .dot.ok { background: var(--brand); } .tl .dot.bad { background: var(--bad); }
     .tl .when { margin-left: auto; font-size: 12.5px; color: var(--ink-3); }
     @media (max-width: 880px) {
       .app { grid-template-columns: 1fr; }
       .sidebar { position: relative; height: auto; flex-direction: row; align-items: center; gap: 18px; overflow-x: auto; }
-      .nav { flex-direction: row; }
-      .side-foot { display: none; } .brand { margin: 0; }
+      .nav { flex-direction: row; margin-top: 0; }
+      .side-foot { display: none; } .brand { padding: 0; }
       .kpis { grid-template-columns: repeat(2, 1fr); }
-      .content { padding: 22px; }
+      .content { padding: 24px; }
     }
   </style>
 </head>
@@ -192,10 +208,22 @@
         </div>
       </div>
       <nav class="nav" id="nav">
-        <button data-view="resumen" class="active"><span class="ic">▤</span> Resumen</button>
-        <button data-view="alumnos"><span class="ic">☰</span> Alumnos</button>
-        <button data-view="reporte"><span class="ic">✦</span> Reporte del grupo</button>
-        <button data-view="generador"><span class="ic">＋</span> Generar ejercicios</button>
+        <button data-view="resumen" class="active">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.6"></rect><rect x="13" y="3" width="8" height="5" rx="1.6"></rect><rect x="13" y="11" width="8" height="10" rx="1.6"></rect><rect x="3" y="14" width="8" height="7" rx="1.6"></rect></svg>
+          Resumen
+        </button>
+        <button data-view="alumnos">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"></path><path d="M16 5.6a3 3 0 0 1 0 5.7"></path><path d="M17.8 19.5c0-2.3-1-4-2.6-4.8"></path></svg>
+          Alumnos
+        </button>
+        <button data-view="reporte">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v13.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-17a.5.5 0 0 1 .5-.5z"></path><path d="M14 3v4h4"></path><path d="M8.5 12.5h7"></path><path d="M8.5 16h7"></path></svg>
+          Reporte del grupo
+        </button>
+        <button data-view="generador">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8.2v7.6M8.2 12h7.6"></path></svg>
+          Generar ejercicios
+        </button>
       </nav>
       <div class="side-foot">
         Tutoría inteligente adaptativa<br>
@@ -209,7 +237,10 @@
           <h1 id="pageTitle">Resumen</h1>
           <p id="pageSub">Vista general del progreso del grupo</p>
         </div>
-        <button class="btn btn-ghost" id="refreshBtn">↻ Actualizar</button>
+        <button class="btn btn-ghost" id="refreshBtn">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12a8.5 8.5 0 1 1-2.3-5.8"></path><path d="M20.5 4v4.5H16"></path></svg>
+          Actualizar
+        </button>
       </div>
 
       <!-- RESUMEN -->
@@ -237,30 +268,35 @@
       <!-- REPORTE -->
       <section class="view" id="view-reporte">
         <div class="ai-card">
-          <span class="ai-tag"><span class="dot"></span> SÓCRATIA · IA</span>
-          <h2 style="margin:0 0 6px; font-size:18px;">Informe pedagógico del grupo</h2>
-          <p class="muted" style="margin:0 0 16px; font-size:14px;">Análisis automático del desempeño general, alumnos en riesgo y recomendaciones.</p>
-          <button class="btn btn-primary" id="reportBtn">Generar informe con IA</button>
-          <div class="ai-body" id="reportBox" style="margin-top:18px;"></div>
+          <span class="ai-tag"><span class="dot"></span> SócratIA · IA</span>
+          <h2>Informe pedagógico del grupo</h2>
+          <p class="muted">Análisis automático del desempeño general, alumnos en riesgo y recomendaciones de intervención.</p>
+          <button class="btn btn-primary" id="reportBtn">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-3.4 3 1 4.8L12 14.5 7.9 16.8l1-4.8L5.5 9l4.6-1.4z"></path></svg>
+            Generar informe con IA
+          </button>
+          <div class="ai-body" id="reportBox" style="margin-top:24px;"></div>
         </div>
       </section>
 
       <!-- GENERADOR -->
       <section class="view" id="view-generador">
         <div class="ai-card">
-          <span class="ai-tag"><span class="dot"></span> SÓCRATIA · GENERADOR</span>
-          <h2 style="margin:0 0 6px; font-size:18px;">Generador de ejercicios</h2>
-          <p class="muted" style="margin:0 0 16px; font-size:14px;">Crea ejercicios de opción múltiple con IA sobre cualquier tema y nivel.</p>
+          <span class="ai-tag"><span class="dot"></span> SócratIA · Generador</span>
+          <h2>Generador de ejercicios</h2>
+          <p class="muted">Crea ejercicios de opción múltiple con IA sobre cualquier tema y nivel.</p>
           <div class="gen-form">
-            <input id="genTopic" placeholder="Tema — ej. ecuaciones lineales" />
-            <input id="genLevel" placeholder="Nivel" value="secundaria" />
-            <input id="genCount" type="number" min="1" max="6" value="3" title="Cantidad" />
-            <select id="genLang">
-              <option value="es">Español</option>
-              <option value="en">English</option>
-              <option value="pt">Português</option>
-              <option value="quechua">Runa Simi (Quechua)</option>
-            </select>
+            <div class="gen-field"><label>Tema</label><input id="genTopic" placeholder="ej. ecuaciones lineales" /></div>
+            <div class="gen-field"><label>Nivel</label><input id="genLevel" value="secundaria" /></div>
+            <div class="gen-field"><label>Cantidad</label><input id="genCount" type="number" min="1" max="6" value="3" /></div>
+            <div class="gen-field"><label>Idioma</label>
+              <select id="genLang">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+                <option value="pt">Português</option>
+                <option value="quechua">Runa Simi (Quechua)</option>
+              </select>
+            </div>
             <button class="btn btn-primary" id="genRun">Generar</button>
           </div>
           <div id="genResult"></div>
@@ -276,8 +312,8 @@
     const API = "/ai";
     let STUDENTS = [];
 
-    const AV = ["#6d28d9","#0e7490","#be185d","#047857","#b45309","#4338ca","#0891b2","#9333ea"];
-    function avatarColor(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))%AV.length; return AV[h]; }
+    const AV = ["#E2ECE5/#1F4D3A","#E6E9EC/#3A4750","#F1E4DF/#9A3F33","#E9EADD/#4A5D23","#EFE6DA/#7A5230","#E2E9EC/#2F5D6B","#ECE6DD/#5A4A2E","#E6E2EC/#4A3F6B"];
+    function avatarPair(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))%AV.length; const [bg,fg]=AV[h].split("/"); return {bg,fg}; }
     function displayName(s){ return s.name && !s.name.includes("@") ? s.name : (s.externalId.startsWith("canvas:") ? "Alumno de Canvas" : s.externalId); }
     function initial(s){ return (displayName(s)[0]||"?").toUpperCase(); }
     function isCanvas(s){ return s.externalId.startsWith("canvas:"); }
@@ -313,20 +349,21 @@
         ${kpi(total,"Alumnos","activos en la plataforma")}
         ${kpi(attempts,"Intentos","ejercicios respondidos")}
         ${kpi(pct(correct,attempts)+"%","Acierto global","del total de intentos")}
-        ${kpi(avg+"%","Dominio promedio","across habilidades")}`;
+        ${kpi(avg+"%","Dominio promedio","en habilidades evaluadas")}`;
     }
     function kpi(n,l,f){ return `<div class="kpi"><div class="label">${l}</div><div class="num">${n}</div><div class="foot">${f}</div></div>`; }
 
     function rowHtml(s){
+      const av=avatarPair(s.externalId);
       return `<tr data-id="${encodeURIComponent(s.externalId)}">
         <td><div class="who">
-          <div class="avatar" style="background:${avatarColor(s.externalId)}">${initial(s)}</div>
-          <div><div class="nm">${displayName(s)}</div>${isCanvas(s)?'<span class="badge">CANVAS</span>':''}</div>
+          <div class="avatar" style="background:${av.bg};color:${av.fg}">${initial(s)}</div>
+          <div style="min-width:0"><div class="nm">${displayName(s)}</div>${isCanvas(s)?'<span class="badge">CANVAS</span>':''}</div>
         </div></td>
         <td class="num-cell">${s.attemptsTotal}</td>
         <td class="num-cell">${s.correctTotal}</td>
         <td>${accuracyPill(s.correctTotal,s.attemptsTotal)}</td>
-        <td><div style="display:flex;align-items:center;gap:10px">${bar(s.avgMastery)}<span class="num-cell" style="font-size:13px">${s.avgMastery==null?"—":Math.round(s.avgMastery*100)+"%"}</span></div></td>
+        <td><div style="display:flex;align-items:center;gap:10px">${bar(s.avgMastery)}<span class="num-cell" style="font-size:13px;min-width:30px">${s.avgMastery==null?"—":Math.round(s.avgMastery*100)+"%"}</span></div></td>
         <td class="muted" style="font-size:13px">${fmtDate(s.lastActivity)}</td>
       </tr>`;
     }
@@ -341,7 +378,7 @@
       const risk=s.filter(x=> (x.avgMastery!=null && x.avgMastery<0.4) || x.attemptsTotal===0)
                   .sort((a,b)=>(a.avgMastery??0)-(b.avgMastery??0));
       const el=document.getElementById("riskList");
-      if(!risk.length){ el.innerHTML=`<div class="empty">Ningún alumno en riesgo. 🎉</div>`; return; }
+      if(!risk.length){ el.innerHTML=`<div class="empty">Ningún alumno en riesgo.</div>`; return; }
       el.innerHTML=`<table><tbody>${risk.map(rowHtml).join("")}</tbody></table>`;
       el.querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click",()=>openDrawer(tr.getAttribute("data-id"))));
     }
@@ -360,7 +397,7 @@
         <div class="drawer-head">
           <button class="close">×</button>
           <h2>${displayName(s)}</h2>
-          <div class="muted" style="color:#cfc6ea;font-size:13px;margin-top:4px">${s.externalId}</div>
+          <div style="color:#D6E0DA;font-size:13px;margin-top:4px">${s.externalId}</div>
           <div class="drawer-chips">
             <div class="chip"><div class="v">${data.attemptsTotal}</div><div class="l">Intentos</div></div>
             <div class="chip"><div class="v">${data.correctTotal}</div><div class="l">Aciertos</div></div>
@@ -371,16 +408,16 @@
           <div class="sec-title">Dominio por habilidad</div>${skills}
           <div class="sec-title">Actividad reciente</div><div class="timeline">${recent}</div>
           <div class="sec-title">Diagnóstico con IA</div>
-          <button class="btn btn-primary" id="diagBtn" style="width:100%">Generar diagnóstico de este alumno</button>
-          <div class="ai-body" id="diagBox" style="margin-top:14px"></div>
+          <button class="btn btn-primary" id="diagBtn" style="width:100%;justify-content:center">Generar diagnóstico de este alumno</button>
+          <div class="ai-body" id="diagBox" style="margin-top:16px"></div>
         </div>`;
       drawer.querySelector(".close").addEventListener("click",closeDrawer);
       drawer.querySelector("#diagBtn").addEventListener("click",async(e)=>{
-        const btn=e.target, box=document.getElementById("diagBox");
+        const btn=e.currentTarget, box=document.getElementById("diagBox");
         btn.disabled=true; btn.textContent="Analizando…";
-        box.innerHTML='<span class="ai-tag"><span class="dot"></span> SÓCRATIA · IA</span><div class="muted">Generando diagnóstico…</div>';
+        box.innerHTML='<span class="ai-tag"><span class="dot"></span> SócratIA · IA</span><div class="muted" style="margin-top:10px">Generando diagnóstico…</div>';
         try{ const d=await (await fetch(`${API}/diagnose/${id}`)).json();
-          box.innerHTML='<span class="ai-tag"><span class="dot"></span> SÓCRATIA · IA</span>'+renderMarkdown(d.diagnosis||"Sin datos suficientes."); }
+          box.innerHTML='<span class="ai-tag"><span class="dot"></span> SócratIA · IA</span><div style="margin-top:12px">'+renderMarkdown(d.diagnosis||"Sin datos suficientes.")+'</div>'; }
         catch(err){ box.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
         btn.disabled=false; btn.textContent="Regenerar diagnóstico";
       });
@@ -401,7 +438,7 @@
 
     // report
     document.getElementById("reportBtn").addEventListener("click",async(e)=>{
-      const btn=e.target, box=document.getElementById("reportBox");
+      const btn=e.currentTarget, box=document.getElementById("reportBox");
       btn.disabled=true; btn.textContent="Analizando el grupo…";
       box.innerHTML='<div class="muted">Generando informe…</div>';
       try{ const d=await (await fetch(`${API}/class-report`)).json(); box.innerHTML=renderMarkdown(d.report||"Sin datos."); }
@@ -412,35 +449,35 @@
     // generator
     let lastGenerated=null;
     document.getElementById("genRun").addEventListener("click",async(e)=>{
-      const btn=e.target, topic=document.getElementById("genTopic").value.trim(), result=document.getElementById("genResult");
-      if(!topic){ result.innerHTML='<div class="muted">Escribe un tema.</div>'; return; }
+      const btn=e.currentTarget, topic=document.getElementById("genTopic").value.trim(), result=document.getElementById("genResult");
+      if(!topic){ result.innerHTML='<div class="muted" style="margin-top:14px">Escribe un tema.</div>'; return; }
       btn.disabled=true; btn.textContent="Generando…"; lastGenerated=null;
-      result.innerHTML='<div class="muted" style="margin-top:14px">Creando ejercicios con IA…</div>';
+      result.innerHTML='<div class="muted" style="margin-top:18px">Creando ejercicios con IA…</div>';
       try{
         const d=await (await fetch(`${API}/generate-problem`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,level:document.getElementById("genLevel").value.trim()||"básico",language:document.getElementById("genLang").value,count:Number(document.getElementById("genCount").value)||3})})).json();
         const probs=Array.isArray(d.problems)?d.problems:[];
         lastGenerated={lesson:d.lesson||topic, language:document.getElementById("genLang").value, problems:probs};
-        result.innerHTML=`<div class="sec-title" style="margin-top:18px">Lección: ${d.lesson||topic}</div>`+probs.map(p=>`
+        result.innerHTML=`<div class="gen-section-title"><span>Lección: ${d.lesson||topic}</span><span></span></div>`+probs.map(p=>`
           <div class="gen-problem">
             <div class="skill">${p.skill||""}</div>
             <div class="ttl">${p.title||""}</div>
-            <div class="muted" style="font-size:14px">${p.body||""}</div>
+            <div class="muted" style="font-size:14.5px">${p.body||""}</div>
             <div class="q">${p.stepTitle||""}</div>
-            ${(p.choices||[]).map(c=>`<div class="gen-choice ${c===p.answer?"correct":""}">${c}${c===p.answer?"  ✓":""}</div>`).join("")}
+            ${(p.choices||[]).map(c=>`<div class="gen-choice ${c===p.answer?"correct":""}"><span>${c}</span>${c===p.answer?'<span class="ok-tag"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F6B4F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" stroke="#9DC4AD"></circle><path d="M8 12.2l2.6 2.6L16 9.4"></path></svg>Correcta</span>':''}</div>`).join("")}
           </div>`).join("")||'<div class="muted">No se generaron ejercicios.</div>';
         if(probs.length){
-          result.innerHTML+=`<div style="margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          result.innerHTML+=`<div style="margin-top:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
             <button class="btn btn-primary" id="publishBtn">Publicar al tutor</button>
-            <span class="muted" style="font-size:13px">Quedará jugable para los alumnos en ~2-3 min.</span>
+            <span class="muted" style="font-size:13.5px">Quedará jugable para los alumnos en ~2-3 min.</span>
             <span id="publishMsg"></span></div>`;
           document.getElementById("publishBtn").addEventListener("click",publishToTutor);
         }
-      }catch(err){ result.innerHTML=`<div class="muted">Error: ${err.message}</div>`; }
+      }catch(err){ result.innerHTML=`<div class="muted" style="margin-top:14px">Error: ${err.message}</div>`; }
       btn.disabled=false; btn.textContent="Generar";
     });
 
     async function publishToTutor(e){
-      const btn=e.target, msg=document.getElementById("publishMsg");
+      const btn=e.currentTarget, msg=document.getElementById("publishMsg");
       if(!lastGenerated){ return; }
       btn.disabled=true; btn.textContent="Publicando…";
       msg.innerHTML='<span class="muted" style="font-size:13px">Escribiendo el contenido y reconstruyendo el tutor…</span>';
@@ -448,7 +485,7 @@
         const r=await fetch(`${API}/publish-lesson`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lastGenerated)});
         const d=await r.json();
         if(d.status==="publicando"){
-          msg.innerHTML=`<span class="pill ok">✓ Publicando ${d.count} ejercicio(s) · listo en ~2-3 min en el curso "SócratIA · Generados"</span>`;
+          msg.innerHTML=`<span class="pill ok">✓ Publicando ${d.count} ejercicio(s) · listo en ~2-3 min en "SócratIA · Generados"</span>`;
           btn.textContent="Publicado";
         } else { msg.innerHTML=`<span class="muted">${d.error||"No se pudo publicar."}</span>`; btn.disabled=false; btn.textContent="Publicar al tutor"; }
       }catch(err){ msg.innerHTML=`<span class="muted">Error: ${err.message}</span>`; btn.disabled=false; btn.textContent="Publicar al tutor"; }
