@@ -46,3 +46,14 @@ CREATE TABLE IF NOT EXISTS misconceptions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_misconceptions_student ON misconceptions (student_id);
+
+CREATE TABLE IF NOT EXISTS course_members (
+    course_id   TEXT NOT NULL,
+    external_id TEXT NOT NULL,
+    name        TEXT,
+    role        TEXT NOT NULL,
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (course_id, external_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_course_members_course ON course_members (course_id, role);

@@ -58,6 +58,7 @@ export interface LtiLaunch {
   readonly name: string | null;
   readonly email: string | null;
   readonly roles: readonly string[];
+  readonly contextId: string | null;
   readonly contextTitle: string | null;
   readonly isInstructor: boolean;
 }
@@ -115,6 +116,10 @@ export async function verifyLaunch(idToken: string, expectedNonce: string): Prom
 
   const roles = asStringArray(payload[CLAIM_ROLES]);
   const context = payload[CLAIM_CONTEXT];
+  const contextId =
+    typeof context === "object" && context !== null && "id" in context
+      ? String((context as { id: unknown }).id)
+      : null;
   const contextTitle =
     typeof context === "object" && context !== null && "title" in context
       ? String((context as { title: unknown }).title)
@@ -125,6 +130,7 @@ export async function verifyLaunch(idToken: string, expectedNonce: string): Prom
     name: typeof payload["name"] === "string" ? payload["name"] : null,
     email: typeof payload["email"] === "string" ? payload["email"] : null,
     roles,
+    contextId,
     contextTitle,
     isInstructor: roles.some((role) => role.includes("Instructor") || role.includes("Teacher")),
   };

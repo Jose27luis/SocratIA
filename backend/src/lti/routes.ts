@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { upsertStudent } from "../repository.js";
+import { upsertCourseMember, upsertStudent } from "../repository.js";
 import { lti, ltiEnabled } from "./config.js";
 import { verifyLaunch } from "./launch.js";
 import { getToolKeys } from "./keys.js";
@@ -80,11 +80,22 @@ export function registerLtiRoutes(app: FastifyInstance): void {
       return;
     }
     const launch = await verifyLaunch(body.id_token ?? "", nonce);
-    const studentId = `canvas:${launch.sub}`;
-    await upsertStudent(studentId, launch.name);
-    const destination = launch.isInstructor ? "/docente/" : "/";
+    const personId = `canvas:${launch.sub}`;
+    const role = launch.isInstructor ? "instructor" : "student";
+    if (launch.contextId !== null) {
+      await upsertCourseMember(launch.contextId, personId, launch.name, role);
+    }
+    if (!launch.isInstructor) {
+      await upsertStudent(personId, launch.name);
+    }
+    const destination =
+      launch.isInstructor && launch.contextId !== null
+        ? `/docente/?course=${encodeURIComponent(launch.contextId)}`
+        : launch.isInstructor
+          ? "/docente/"
+          : "/";
     await reply
       .header("Content-Type", "text/html; charset=utf-8")
-      .send(bridgePage(studentId, launch.name, destination));
+      .send(bridgePage(personId, launch.name, destination));
   });
 }

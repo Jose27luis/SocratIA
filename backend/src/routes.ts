@@ -73,7 +73,13 @@ export function registerRoutes(app: FastifyInstance): void {
     getProgress(request.params.student),
   );
 
-  app.get("/students", async () => listStudents());
+  app.get<{ Querystring: { course?: string } }>("/students", async (request) =>
+    listStudents(
+      typeof request.query.course === "string" && request.query.course !== ""
+        ? request.query.course
+        : null,
+    ),
+  );
 
   app.post("/translate", async (request) => {
     const { texts, target } = parseTranslate(request.body);
@@ -127,8 +133,12 @@ export function registerRoutes(app: FastifyInstance): void {
     return { diagnosis };
   });
 
-  app.get("/class-report", async () => {
-    const students = await listStudents();
+  app.get<{ Querystring: { course?: string } }>("/class-report", async (request) => {
+    const course =
+      typeof request.query.course === "string" && request.query.course !== ""
+        ? request.query.course
+        : null;
+    const students = await listStudents(course);
     const report = await classReport(students);
     return { report };
   });

@@ -92,6 +92,23 @@ export async function upsertStudent(externalId: string, name: string | null): Pr
   );
 }
 
+export async function upsertCourseMember(
+  courseId: string,
+  externalId: string,
+  name: string | null,
+  role: string,
+): Promise<void> {
+  await pool.query(
+    `INSERT INTO course_members (course_id, external_id, name, role)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (course_id, external_id)
+     DO UPDATE SET name = COALESCE(EXCLUDED.name, course_members.name),
+                   role = EXCLUDED.role,
+                   updated_at = now()`,
+    [courseId, externalId, name, role],
+  );
+}
+
 export async function getProgress(externalId: string): Promise<StudentProgress> {
   const studentResult = await pool.query<StudentRow>(
     "SELECT id, external_id, name, created_at FROM students WHERE external_id = $1",
@@ -218,7 +235,15 @@ export async function saveTranslations(
   }
 }
 
-export async function listStudents(): Promise<StudentSummary[]> {
+export async function listStudents(courseId: string | null = null): Promise<StudentSummary[]> {
+  const filter =
+    courseId === null
+      ? ""
+      : `WHERE s.external_id IN (
+           SELECT external_id FROM course_members
+           WHERE course_id = $1 AND role = 'student'
+         )`;
+  const params = courseId === null ? [] : [courseId];
   const result = await pool.query<SummaryRow>(
     `SELECT s.external_id,
             s.name,
@@ -228,8 +253,10 @@ export async function listStudents(): Promise<StudentSummary[]> {
             (SELECT AVG(mastery) FROM skill_mastery sm WHERE sm.student_id = s.id) AS avg_mastery
      FROM students s
      LEFT JOIN attempts a ON a.student_id = s.id
+     ${filter}
      GROUP BY s.id
      ORDER BY MAX(a.created_at) DESC NULLS LAST`,
+    params,
   );
   return result.rows.map((row) => ({
     externalId: row.external_id,
